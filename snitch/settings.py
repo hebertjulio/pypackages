@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -118,3 +119,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+
+# https://docs.djangoproject.com/en/3.0/howto/static-files/#serving-files-uploaded-by-a-user-during-development
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+
+# https://docs.djangoproject.com/en/3.0/ref/settings/#auth-user-model
+
+AUTH_USER_MODEL = 'accounts.User'
+
+
+# https://docs.djangoproject.com/en/3.0/ref/settings/#login-url
+
+LOGIN_URL = '/admin/'
