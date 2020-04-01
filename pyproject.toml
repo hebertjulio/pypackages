@@ -9,6 +9,8 @@ license = "MIT"
 python = "^3.7"
 django = "^3.0.0"
 django-model-utils = "^4.0.0"
+pygithub = "^1.47"
+tweepy = "^3.8.0"
 
 [tool.poetry.dev-dependencies]
 
