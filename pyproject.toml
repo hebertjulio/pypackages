@@ -11,6 +11,7 @@ django = "^3.0.0"
 django-model-utils = "^4.0.0"
 pygithub = "^1.47"
 tweepy = "^3.8.0"
+dynaconf = {extras = ["toml"], version = "^2.2.3"}
 
 [tool.poetry.dev-dependencies]
 

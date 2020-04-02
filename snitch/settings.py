@@ -19,9 +19,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'q2-alud(^k99mzzraf3#i^3amo)46t77nk5#oj%&#2755cxx_*'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -140,3 +137,16 @@ AUTH_USER_MODEL = 'accounts.User'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#login-url
 
 LOGIN_URL = '/admin/'
+
+
+# HERE STARTS DYNACONF EXTENSION LOAD (Keep at the very bottom of settings.py)
+# Read more at https://dynaconf.readthedocs.io/en/latest/guides/django.html
+
+import dynaconf  # noqa
+
+settings = dynaconf.DjangoDynaconf(__name__,
+    ROOT_PATH=BASE_DIR,
+    SECRETS=BASE_DIR,
+)  # noqa
+
+# HERE ENDS DYNACONF EXTENSION LOAD (No more code below this line)
