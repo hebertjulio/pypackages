@@ -12,6 +12,7 @@ class Package(TimeStampedModel):
     PROGRAMMING_LANGUAGE = Choices(
         ('python', 'python'),
         ('javascript', 'javascript'),
+        ('css', 'css'),
     )
 
     TWITTER_ACCOUNT = Choices(
