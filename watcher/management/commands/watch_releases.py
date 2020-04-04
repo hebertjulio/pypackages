@@ -1,9 +1,9 @@
 import sys
+import re
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
-from django.utils import timezone
 
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
@@ -11,10 +11,13 @@ from gql.transport.requests import RequestsHTTPTransport
 from ...models import Package, Release
 
 
+REGEX = r'((\d+)(?:\.\d+)+)$'
+
+
 class GithubInterface(object):
     query = '''{
         repository(owner: "%s", name: "%s") {
-            tags:refs(refPrefix: "refs/tags/", first: 10, orderBy: {
+            tags:refs(refPrefix: "refs/tags/", first: 5, orderBy: {
             field: TAG_COMMIT_DATE, direction: DESC}) {
                 nodes {
                     name
@@ -55,23 +58,28 @@ class GithubInterface(object):
     def get_releases(self, repository_owner, repository_name):
         query = gql(self.query % (repository_owner, repository_name))
         releases = self.client.execute(query)
-        for release in releases['repository']['tags']['nodes']:
-            name = release['name']
+        releases = releases['repository']['tags']['nodes']
+        previous_prefix = set()
+        for release in releases:
             created = parse_datetime(
                 release['target']['author']['date']
                 if 'author' in release['target']
                 else release['target']['tagger']['date']
             )
-            yield {
-                'name': name,
-                'created': created,
-            }
+            matches = re.search(REGEX, release['name'])
+            if matches is not None:
+                current_prefix = matches.group(2)
+                name = matches.group(1)
+                if current_prefix not in previous_prefix:
+                    previous_prefix.add(current_prefix)
+                    yield {
+                        'name': name,
+                        'created': created
+                    }
 
 
 class Command(BaseCommand):
     help = 'Watch for new releases in code hosting.'
-
-    now = timezone.now()
 
     def handle(self, *args, **options):
         try:
@@ -98,11 +106,10 @@ class Command(BaseCommand):
 
     def add_release(self, releases, package):
         for release in releases:
-            if abs(self.now - release['created']).days <= 10:
-                release_exists = Release.objects.filter(
-                    name=release['name'], package=package
-                ).exists()
-                if release_exists is False:
-                    Release.objects.create(**{
-                        **release, 'package': package
-                    })
+            release_exists = Release.objects.filter(
+                name=release['name'], package=package
+            ).exists()
+            if release_exists is False:
+                Release.objects.create(**{
+                    **release, 'package': package
+                })
