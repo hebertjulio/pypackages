@@ -1,4 +1,6 @@
-from django.core.management.base import BaseCommand
+import sys
+
+from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
@@ -66,25 +68,37 @@ class GithubInterface(object):
             }
 
 
-CODE_HOSTINGS = {
-    'github': GithubInterface(),
-}
-
-
 class Command(BaseCommand):
     help = 'Watch for new releases in code hosting.'
 
+    now = timezone.now()
+
     def handle(self, *args, **options):
-        for package in Package.objects.all():
-            code_hosting = CODE_HOSTINGS[package.code_hosting]
+        try:
+            print('start processing')
+            code_hostings = {
+                'github': GithubInterface(),
+            }
+            while True:
+                self.processing(code_hostings)
+        except KeyboardInterrupt:
+            pass
+        except Exception as e:
+            raise CommandError(e)
+        finally:
+            sys.exit(0)
+
+    def processing(self, code_hostings):
+        packages = Package.objects.all()
+        for package in packages:
+            code_hosting = code_hostings[package.code_hosting]
             releases = code_hosting.get_releases(
                 package.repository_owner, package.repository_name)
             self.add_release(releases, package)
 
     def add_release(self, releases, package):
-        now = timezone.now()
         for release in releases:
-            if abs(now - release['created']).days <= 10:
+            if abs(self.now - release['created']).days <= 10:
                 release_exists = Release.objects.filter(
                     name=release['name'], package=package
                 ).exists()
