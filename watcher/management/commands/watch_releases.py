@@ -11,13 +11,13 @@ from gql.transport.requests import RequestsHTTPTransport
 from ...models import Package, Release
 
 
-REGEX = r'((\d+)(?:\.\d+)+)$'
+REGEX = r'((\d+)(?:[\.\_]\d+)+)$'
 
 
 class GithubInterface(object):
     query = '''{
         repository(owner: "%s", name: "%s") {
-            tags:refs(refPrefix: "refs/tags/", first: 5, orderBy: {
+            tags:refs(refPrefix: "refs/tags/", first: 3, orderBy: {
             field: TAG_COMMIT_DATE, direction: DESC}) {
                 nodes {
                     name
@@ -73,7 +73,7 @@ class GithubInterface(object):
                 if current_prefix not in previous_prefix:
                     previous_prefix.add(current_prefix)
                     yield {
-                        'name': name,
+                        'name': name.replace('_', '.'),
                         'created': created
                     }
 
