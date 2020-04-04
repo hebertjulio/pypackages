@@ -15,10 +15,6 @@ class Package(TimeStampedModel):
         ('css', 'css'),
     )
 
-    TWITTER_ACCOUNT = Choices(
-        ('pypackages', 'pypackages'),
-    )
-
     CODE_HOSTING = Choices(
         ('github', 'github'),
     )
@@ -27,16 +23,16 @@ class Package(TimeStampedModel):
         _('name'), max_length=100
     )
     programming_language = models.CharField(
-        _('programming language'), max_length=30, choices=PROGRAMMING_LANGUAGE
-    )
-    twitter_account = models.CharField(
-        _('twitter account'), max_length=30, choices=TWITTER_ACCOUNT
+        _('programming language'), max_length=50, choices=PROGRAMMING_LANGUAGE
     )
     code_hosting = models.CharField(
-        _('code hosting'), max_length=30, choices=CODE_HOSTING
+        _('code hosting'), max_length=50, choices=CODE_HOSTING
     )
-    repository = models.CharField(
-        _('repository'), max_length=200
+    repository_owner = models.CharField(
+        _('repository owner'), max_length=100
+    )
+    repository_name = models.CharField(
+        _('repository name'), max_length=100
     )
 
     def __str__(self):
@@ -50,7 +46,7 @@ class Package(TimeStampedModel):
         verbose_name_plural = _('packages')
         unique_together = [
             ['name', 'programming_language'],
-            ['code_hosting', 'repository'],
+            ['code_hosting', 'repository_owner', 'repository_name'],
         ]
         ordering = [
             'name',
@@ -66,16 +62,10 @@ class Release(TimeStampedModel):
     )
 
     name = models.CharField(
-        _('name'), max_length=30
-    )
-    prerelease = models.BooleanField(
-        _('prerelease')
-    )
-    published_at = models.DateTimeField(
-        _('published at')
+        _('name'), max_length=50
     )
     status = models.CharField(
-        _('status'), max_length=30, db_index=True,
+        _('status'), max_length=50, db_index=True,
         choices=STATUS, default=STATUS.new
     )
     package = models.ForeignKey(
@@ -95,7 +85,7 @@ class Release(TimeStampedModel):
             ['name', 'package'],
         ]
         ordering = [
-            'name',
+            '-created',
         ]
 
 

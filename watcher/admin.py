@@ -6,8 +6,8 @@ from .models import Package, Release, Log
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'programming_language', 'code_hosting', 'repository',
-        'twitter_account',
+        'name', 'programming_language', 'code_hosting', 'repository_owner',
+        'repository_name',
     )
     search_fields = (
         'name', 'repository',
@@ -16,14 +16,14 @@ class PackageAdmin(admin.ModelAdmin):
         'created', 'modified',
     )
     list_filter = (
-        'programming_language', 'code_hosting', 'twitter_account',
+        'programming_language', 'code_hosting',
     )
 
 
 @admin.register(Release)
 class ReleaseAdmin(admin.ModelAdmin):
     list_display = (
-        'package', 'name', 'prerelease', 'published_at', 'status',
+        'package', 'name', 'status',
     )
     search_fields = (
         'name', 'package',
@@ -32,7 +32,7 @@ class ReleaseAdmin(admin.ModelAdmin):
         'created', 'modified',
     )
     list_filter = (
-        'prerelease', 'created', 'published_at', 'status',
+        'created', 'status',
     )
     autocomplete_fields = (
         'package',
