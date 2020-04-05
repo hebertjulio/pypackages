@@ -145,6 +145,11 @@ LOGIN_URL = '/admin/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
+# https://docs.djangoproject.com/en/3.0/topics/http/sessions/
+
+SESSION_COOKIE_AGE = 10800  # 3 hours
+
+
 # HERE STARTS DYNACONF EXTENSION LOAD (Keep at the very bottom of settings.py)
 # Read more at https://dynaconf.readthedocs.io/en/latest/guides/django.html
 
