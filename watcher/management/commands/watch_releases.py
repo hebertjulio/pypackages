@@ -14,7 +14,7 @@ from ...models import Package, Release, Log
 
 
 REGEX = r'((\d+)(?:[\.\_]\d+)+)$'
-RELEASE_CREATED_LAST_DAYS = 10
+RELEASE_MIN_AGE = 10  # days
 
 
 class GithubInterface(object):
@@ -71,7 +71,7 @@ class GithubInterface(object):
                 if 'author' in release['target']
                 else release['target']['tagger']['date']
             )
-            if abs(self.now - created).days <= RELEASE_CREATED_LAST_DAYS:
+            if abs(self.now - created).days <= RELEASE_MIN_AGE:
                 matches = re.search(REGEX, release['name'])
                 if matches is not None:
                     current_prefix = matches.group(2)
@@ -98,7 +98,6 @@ class Command(BaseCommand):
             sys.exit(0)
         except Exception:
             Log.objects.create(message=traceback.format_exc())
-            raise
         finally:
             print('end processing')
 
