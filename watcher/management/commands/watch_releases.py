@@ -90,11 +90,9 @@ class Command(BaseCommand):
             while True:
                 self.processing(code_hostings)
         except KeyboardInterrupt:
-            pass
+            sys.exit(0)
         except Exception as e:
             raise CommandError(e)
-        finally:
-            sys.exit(0)
 
     def processing(self, code_hostings):
         packages = Package.objects.all()
