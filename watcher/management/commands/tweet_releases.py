@@ -1,11 +1,12 @@
 import sys
+import traceback
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.conf import settings
 
 import tweepy
 
-from ...models import Release
+from ...models import Release, Log
 
 
 class Command(BaseCommand):
@@ -37,8 +38,10 @@ class Command(BaseCommand):
                 self.processing()
         except KeyboardInterrupt:
             sys.exit(0)
-        except Exception as e:
-            raise CommandError(e)
+        except Exception:
+            Log.objects.create(
+                message=traceback.format_exc())
+            raise
 
     def processing(self):
         releases = Release.objects.filter(status=Release.STATUS.new)
@@ -51,8 +54,8 @@ class Command(BaseCommand):
             api.update_status(self.tweet_message.format(
                 release.package.name, release.name))
             release.status = Release.STATUS.tweeted
-        except Exception as e:
+        except Exception:
             release.status = Release.STATUS.fail
-            print(e)
+            Log.objects.create(message=traceback.format_exc())
         finally:
             release.save()

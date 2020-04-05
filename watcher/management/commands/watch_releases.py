@@ -1,5 +1,6 @@
 import sys
 import re
+import traceback
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
@@ -8,7 +9,7 @@ from django.utils.dateparse import parse_datetime
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
-from ...models import Package, Release
+from ...models import Package, Release, Log
 
 
 REGEX = r'((\d+)(?:[\.\_]\d+)+)$'
@@ -91,8 +92,9 @@ class Command(BaseCommand):
                 self.processing(code_hostings)
         except KeyboardInterrupt:
             sys.exit(0)
-        except Exception as e:
-            raise CommandError(e)
+        except Exception:
+            Log.objects.create(message=traceback.format_exc())
+            raise
 
     def processing(self, code_hostings):
         packages = Package.objects.all()
@@ -111,3 +113,6 @@ class Command(BaseCommand):
                 Release.objects.create(**{
                     **release, 'package': package
                 })
+
+    def add_log(self, message):
+        Log.objects.create(message=message)
