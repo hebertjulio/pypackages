@@ -1,7 +1,7 @@
 .vscode/
 
-/media/
-/static/
+/media/*
+/static/*
 
 __pycache__/
 __mypy__/
@@ -10,3 +10,7 @@ __mypy__/
 *.sqlite3
 *.db
 .secrets.*
+
+
+!/media/.gitkeep
+!/static/.gitkeep
