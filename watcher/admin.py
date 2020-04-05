@@ -42,14 +42,13 @@ class ReleaseAdmin(admin.ModelAdmin):
 @admin.register(Log)
 class LogAdmin(admin.ModelAdmin):
     list_display = (
-        'content_type', 'object_id', 'message', 'created',
+        'message', 'created',
     )
     search_fields = (
-        'content_type', 'object_id', 'message',
+        'message',
     )
     readonly_fields = (
-        'content_type', 'object_id', 'message',
-        'created', 'modified',
+        'message', 'created', 'modified',
     )
     list_filter = (
         'created',
@@ -59,7 +58,4 @@ class LogAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
         return False
