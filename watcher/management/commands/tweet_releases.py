@@ -1,6 +1,7 @@
 import sys
 import traceback
 import datetime
+import time
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -20,25 +21,10 @@ class Command(BaseCommand):
     api = {}
     tweet_message = "#{} a new release was launched: {}"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        twitter_accounts = settings.get("TWITTER_ACCOUNT", {})
-        for language in ['python', 'javascript', 'css']:
-            twitter_account = twitter_accounts.get(language)
-            if twitter_account is not None:
-                auth = tweepy.OAuthHandler(
-                    twitter_account["API_KEY"],
-                    twitter_account["API_SECRET"]
-                )
-                auth.set_access_token(
-                    twitter_account["ACCESS_TOKEN"],
-                    twitter_account["ACCESS_TOKEN_SECRET"]
-                )
-                self.api[language] = tweepy.API(auth)
-
     def handle(self, *args, **options):
         try:
-            print('start processing')
+            start_time = time.time()
+            self.load_api()
             self.processing()
         except KeyboardInterrupt:
             sys.exit(0)
@@ -46,7 +32,8 @@ class Command(BaseCommand):
             Log.objects.create(
                 message=traceback.format_exc())
         finally:
-            print('end processing')
+            print("tweet_releases: %s seconds" % (
+                time.time() - start_time))
 
     def processing(self):
         created = timezone.now() - datetime.timedelta(days=RELEASE_MIN_AGE)
@@ -54,6 +41,21 @@ class Command(BaseCommand):
             created__lte=created, status=Release.STATUS.new)
         for release in releases:
             self.write_tweet(release)
+
+    def load_api(self):
+        twitter_accounts = settings.get('TWITTER_ACCOUNT', {})
+        for language in ['python', 'javascript', 'css']:
+            twitter_account = twitter_accounts.get(language)
+            if twitter_account is not None:
+                auth = tweepy.OAuthHandler(
+                    twitter_account['API_KEY'],
+                    twitter_account['API_SECRET']
+                )
+                auth.set_access_token(
+                    twitter_account['ACCESS_TOKEN'],
+                    twitter_account['ACCESS_TOKEN_SECRET']
+                )
+                self.api[language] = tweepy.API(auth)
 
     def write_tweet(self, release):
         try:

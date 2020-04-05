@@ -1,6 +1,7 @@
 import sys
 import re
 import traceback
+import time
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -20,7 +21,7 @@ RELEASE_MIN_AGE = 10  # days
 class GithubInterface(object):
     query = '''{
         repository(owner: "%s", name: "%s") {
-            tags:refs(refPrefix: "refs/tags/", first: 5, orderBy: {
+            tags:refs(refPrefix: "refs/tags/", first: 3, orderBy: {
             field: TAG_COMMIT_DATE, direction: DESC}) {
                 nodes {
                     name
@@ -89,7 +90,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            print('start processing')
+            start_time = time.time()
             code_hostings = {
                 'github': GithubInterface(),
             }
@@ -99,7 +100,8 @@ class Command(BaseCommand):
         except Exception:
             Log.objects.create(message=traceback.format_exc())
         finally:
-            print('end processing')
+            print("watch_releases: %s seconds" % (
+                time.time() - start_time))
 
     def processing(self, code_hostings):
         packages = Package.objects.all()
