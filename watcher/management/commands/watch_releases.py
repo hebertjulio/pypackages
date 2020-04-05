@@ -5,6 +5,7 @@ import traceback
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
@@ -13,12 +14,13 @@ from ...models import Package, Release, Log
 
 
 REGEX = r'((\d+)(?:[\.\_]\d+)+)$'
+RELEASE_CREATED_LAST_DAYS = 10
 
 
 class GithubInterface(object):
     query = '''{
         repository(owner: "%s", name: "%s") {
-            tags:refs(refPrefix: "refs/tags/", first: 3, orderBy: {
+            tags:refs(refPrefix: "refs/tags/", first: 5, orderBy: {
             field: TAG_COMMIT_DATE, direction: DESC}) {
                 nodes {
                     name
@@ -38,6 +40,8 @@ class GithubInterface(object):
             }
         }
     }'''
+
+    now = timezone.now()
 
     def __init__(self):
         access_token = settings.CODE_HOSTINGS['github']['ACCESS_TOKEN']
@@ -67,16 +71,17 @@ class GithubInterface(object):
                 if 'author' in release['target']
                 else release['target']['tagger']['date']
             )
-            matches = re.search(REGEX, release['name'])
-            if matches is not None:
-                current_prefix = matches.group(2)
-                name = matches.group(1)
-                if current_prefix not in previous_prefix:
-                    previous_prefix.add(current_prefix)
-                    yield {
-                        'name': name.replace('_', '.'),
-                        'created': created
-                    }
+            if abs(self.now - created).days <= RELEASE_CREATED_LAST_DAYS:
+                matches = re.search(REGEX, release['name'])
+                if matches is not None:
+                    current_prefix = matches.group(2)
+                    name = matches.group(1)
+                    if current_prefix not in previous_prefix:
+                        previous_prefix.add(current_prefix)
+                        yield {
+                            'name': name.replace('_', '.'),
+                            'created': created
+                        }
 
 
 class Command(BaseCommand):
