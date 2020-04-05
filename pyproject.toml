@@ -13,6 +13,7 @@ tweepy = "^3.8.0"
 dynaconf = {extras = ["toml"], version = "^2.2.3"}
 gql = "^0.4.0"
 gunicorn = "^20.0.4"
+whitenoise = "^5.0.1"
 
 [tool.poetry.dev-dependencies]
 
