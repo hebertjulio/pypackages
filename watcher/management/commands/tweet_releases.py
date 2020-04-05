@@ -34,14 +34,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             print('start processing')
-            while True:
-                self.processing()
+            self.processing()
         except KeyboardInterrupt:
             sys.exit(0)
         except Exception:
             Log.objects.create(
                 message=traceback.format_exc())
             raise
+        finally:
+            print('end processing')
 
     def processing(self):
         releases = Release.objects.filter(status=Release.STATUS.new)

@@ -2,7 +2,7 @@ import sys
 import re
 import traceback
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
 
@@ -88,13 +88,14 @@ class Command(BaseCommand):
             code_hostings = {
                 'github': GithubInterface(),
             }
-            while True:
-                self.processing(code_hostings)
+            self.processing(code_hostings)
         except KeyboardInterrupt:
             sys.exit(0)
         except Exception:
             Log.objects.create(message=traceback.format_exc())
             raise
+        finally:
+            print('end processing')
 
     def processing(self, code_hostings):
         packages = Package.objects.all()
