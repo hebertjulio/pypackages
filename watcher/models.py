@@ -84,16 +84,3 @@ class Release(TimeStampedModel):
         ordering = [
             '-created',
         ]
-
-
-class Log(TimeStampedModel):
-    message = models.TextField(
-        _('message')
-    )
-
-    class Meta:
-        verbose_name = _('log')
-        verbose_name_plural = _('logs')
-        ordering = [
-            '-created',
-        ]

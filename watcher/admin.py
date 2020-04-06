@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Package, Release, Log
+from .models import Package, Release
 
 
 @admin.register(Package)
@@ -37,25 +37,3 @@ class ReleaseAdmin(admin.ModelAdmin):
     autocomplete_fields = (
         'package',
     )
-
-
-@admin.register(Log)
-class LogAdmin(admin.ModelAdmin):
-    list_display = (
-        'message', 'created',
-    )
-    search_fields = (
-        'message',
-    )
-    readonly_fields = (
-        'message', 'created', 'modified',
-    )
-    list_filter = (
-        'created',
-    )
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
