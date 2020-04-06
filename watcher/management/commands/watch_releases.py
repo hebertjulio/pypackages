@@ -13,7 +13,7 @@ from ...models import Package, Release
 
 
 REGEX = r'((\d+)(?:[\.\_]\d+)+)$'
-RELEASE_MIN_AGE = 10  # days
+RELEASE_MIN_AGE = 15  # days
 
 
 class GithubInterface(object):
