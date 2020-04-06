@@ -63,7 +63,8 @@ class Command(BaseCommand):
             programming_language = release.package.programming_language
             release_name = release.name
             text = self.text_template % (
-                package_name, release_name, programming_language, package_name)
+                package_name, release_name, programming_language,
+                package_name.replace('-', '').replace('_', ''))
             api.update_status(text)
             release.status = Release.STATUS.tweeted
             release.save()
