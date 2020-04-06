@@ -8,7 +8,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job('interval', hours=4)
+@sched.scheduled_job('interval', hours=8)
 def watch_releases():
     try:
         print('watch_releases: starting')
