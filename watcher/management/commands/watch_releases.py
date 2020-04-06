@@ -120,6 +120,3 @@ class Command(BaseCommand):
                 Release.objects.create(**{
                     **release, 'package': package
                 })
-
-    def add_log(self, message):
-        Log.objects.create(message=message)
