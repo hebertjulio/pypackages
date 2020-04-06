@@ -1,7 +1,5 @@
 import sys
-import traceback
 import datetime
-import time
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -9,7 +7,7 @@ from django.utils import timezone
 
 import tweepy
 
-from ...models import Release, Log
+from ...models import Release
 
 
 RELEASE_MIN_AGE = 1  # days
@@ -18,54 +16,49 @@ RELEASE_MIN_AGE = 1  # days
 class Command(BaseCommand):
     help = 'Tweet new releases.'
 
-    api = {}
     tweet_message = "#{} a new release was launched: {}"
 
     def handle(self, *args, **options):
         try:
-            start_time = time.time()
-            self.load_api()
-            self.processing()
+            accounts = self.get_accounts()
+            self.processing(accounts)
         except KeyboardInterrupt:
             sys.exit(0)
-        except Exception:
-            Log.objects.create(
-                message=traceback.format_exc())
-        finally:
-            print("tweet_releases: %s seconds" % (
-                time.time() - start_time))
 
-    def processing(self):
+    def processing(self, accounts):
         created = timezone.now() - datetime.timedelta(days=RELEASE_MIN_AGE)
-        releases = Release.objects.filter(
-            created__lte=created, status=Release.STATUS.new)
-        for release in releases:
-            self.write_tweet(release)
+        for account in accounts:
+            releases = Release.objects.filter(
+                package__programming_language=account['programming_language'],
+                created__lte=created, status=Release.STATUS.new
+            ).order_by('created')[0:1]
+            if releases:
+                self.write_tweet(releases[0], account['api'])
 
-    def load_api(self):
-        twitter_accounts = settings.get('TWITTER_ACCOUNT', {})
-        for language in ['python', 'javascript', 'css']:
-            twitter_account = twitter_accounts.get(language)
-            if twitter_account is not None:
-                auth = tweepy.OAuthHandler(
-                    twitter_account['API_KEY'],
-                    twitter_account['API_SECRET']
-                )
-                auth.set_access_token(
-                    twitter_account['ACCESS_TOKEN'],
-                    twitter_account['ACCESS_TOKEN_SECRET']
-                )
-                self.api[language] = tweepy.API(auth)
+    def get_accounts(self):
+        if 'TWITTER_ACCOUNTS' in settings:
+            for programming_language in ['python', 'javascript', 'css']:
+                if programming_language in settings['TWITTER_ACCOUNTS']:
+                    secrets = settings[
+                        'TWITTER_ACCOUNTS'][programming_language]
+                    auth = tweepy.OAuthHandler(
+                        secrets['API_KEY'],
+                        secrets['API_SECRET']
+                    )
+                    auth.set_access_token(
+                        secrets['ACCESS_TOKEN'],
+                        secrets['ACCESS_TOKEN_SECRET']
+                    )
+                    yield {
+                        'programming_language': programming_language,
+                        'api': tweepy.API(auth)
+                    }
 
-    def write_tweet(self, release):
+    def write_tweet(self, release, api):
         try:
-            if release.package.programming_language in self.api:
-                api = self.api[release.package.programming_language]
-                api.update_status(self.tweet_message.format(
-                    release.package.name, release.name))
-                release.status = Release.STATUS.tweeted
-        except Exception:
-            release.status = Release.STATUS.fail
-            Log.objects.create(message=traceback.format_exc())
-        finally:
+            api.update_status(self.tweet_message.format(
+                release.package.name, release.name))
+            release.status = Release.STATUS.tweeted
             release.save()
+        except Exception:
+            pass
