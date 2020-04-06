@@ -24,6 +24,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+ADMINS = (
+    ('Hebert', 'hebertjulio@users.noreply.github.com'),
+    ('Adriano', 'adrianoramos@users.noreply.github.com'),
+)
+
 
 # Application definition
 
