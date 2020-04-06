@@ -16,7 +16,10 @@ RELEASE_MIN_AGE = 1  # days
 class Command(BaseCommand):
     help = 'Tweet new releases.'
 
-    tweet_message = "#{} a new release was launched: {}"
+    text_template = (
+        'The release of %s package %s is now available. 🥳'
+        '\n\n#%s #%s 😍'
+    )
 
     def handle(self, *args, **options):
         try:
@@ -56,9 +59,13 @@ class Command(BaseCommand):
 
     def write_tweet(self, release, api):
         try:
-            api.update_status(self.tweet_message.format(
-                release.package.name, release.name))
+            package_name = release.package.name
+            programming_language = release.package.programming_language
+            release_name = release.name
+            text = self.text_template % (
+                package_name, release_name, programming_language, package_name)
+            api.update_status(text)
             release.status = Release.STATUS.tweeted
             release.save()
         except Exception:
-            pass
+            raise
