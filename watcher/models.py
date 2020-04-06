@@ -53,9 +53,7 @@ class Package(TimeStampedModel):
 class Release(TimeStampedModel):
     STATUS = Choices(
         ('new', _('new')),
-        ('available', _('available')),
         ('tweeted', _('tweeted')),
-        ('fail', _('fail')),
     )
 
     name = models.CharField(
