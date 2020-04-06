@@ -1,7 +1,5 @@
 import sys
 import re
-import traceback
-import time
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -11,7 +9,7 @@ from django.utils import timezone
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
-from ...models import Package, Release, Log
+from ...models import Package, Release
 
 
 REGEX = r'((\d+)(?:[\.\_]\d+)+)$'
@@ -21,7 +19,7 @@ RELEASE_MIN_AGE = 10  # days
 class GithubInterface(object):
     query = '''{
         repository(owner: "%s", name: "%s") {
-            tags:refs(refPrefix: "refs/tags/", first: 3, orderBy: {
+            tags:refs(refPrefix: "refs/tags/", first: 5, orderBy: {
             field: TAG_COMMIT_DATE, direction: DESC}) {
                 nodes {
                     name
@@ -90,18 +88,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            start_time = time.time()
             code_hostings = {
                 'github': GithubInterface(),
             }
             self.processing(code_hostings)
         except KeyboardInterrupt:
             sys.exit(0)
-        except Exception:
-            Log.objects.create(message=traceback.format_exc())
-        finally:
-            print("watch_releases: %s seconds" % (
-                time.time() - start_time))
 
     def processing(self, code_hostings):
         packages = Package.objects.all()
