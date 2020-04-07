@@ -7,7 +7,7 @@ from .models import Package, Release
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'programming_language', 'code_hosting', 'repository_owner',
-        'repository_name',
+        'repository_name', 'release_regex'
     )
     search_fields = (
         'name', 'repository',
@@ -32,7 +32,8 @@ class ReleaseAdmin(admin.ModelAdmin):
         'created', 'modified',
     )
     list_filter = (
-        'created', 'status',
+        'package__programming_language',
+        'status', 'created'
     )
     autocomplete_fields = (
         'package',
