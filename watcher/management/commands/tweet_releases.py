@@ -21,6 +21,10 @@ class Command(BaseCommand):
         '\n\n#%s #%s 😍'
     )
 
+    chars = '@/_-#$%*!()&=+[]:;? '
+    trans = str.maketrans(
+        dict(zip(list(chars), ['' for v in range(len(chars))])))
+
     def handle(self, *args, **options):
         try:
             accounts = self.get_accounts()
@@ -64,7 +68,7 @@ class Command(BaseCommand):
             release_name = release.name
             text = self.text_template % (
                 package_name, release_name, programming_language,
-                package_name.replace('-', '').replace('_', ''))
+                package_name.translate(self.trans))
             api.update_status(text)
             release.status = Release.STATUS.tweeted
             release.save()
