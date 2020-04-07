@@ -31,6 +31,9 @@ class Package(TimeStampedModel):
     repository_name = models.CharField(
         _('repository name'), max_length=100
     )
+    release_regex = models.CharField(
+        _('release regex'), max_length=100
+    )
 
     def __str__(self):
         return self.name

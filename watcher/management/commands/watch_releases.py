@@ -12,7 +12,6 @@ from gql.transport.requests import RequestsHTTPTransport
 from ...models import Package, Release
 
 
-REGEX = r'((\d+)(?:[\.\_]\d+)+)$'
 RELEASE_MIN_AGE = 15  # days
 
 
@@ -59,7 +58,7 @@ class GithubInterface(object):
             fetch_schema_from_transport=True
         )
 
-    def get_releases(self, repository_owner, repository_name):
+    def get_releases(self, release_regex, repository_owner, repository_name):
         query = gql(self.query % (repository_owner, repository_name))
         releases = self.client.execute(query)
         releases = releases['repository']['tags']['nodes']
@@ -71,7 +70,7 @@ class GithubInterface(object):
                 else release['target']['tagger']['date']
             )
             if abs(self.now - created).days <= RELEASE_MIN_AGE:
-                matches = re.search(REGEX, release['name'])
+                matches = re.search(release_regex, release['name'])
                 if matches is not None:
                     current_prefix = matches.group(2)
                     name = matches.group(1)
@@ -100,7 +99,10 @@ class Command(BaseCommand):
         for package in packages:
             code_hosting = code_hostings[package.code_hosting]
             releases = code_hosting.get_releases(
-                package.repository_owner, package.repository_name)
+                package.release_regex,
+                package.repository_owner,
+                package.repository_name
+            )
             self.add_release(releases, package)
 
     def add_release(self, releases, package):
