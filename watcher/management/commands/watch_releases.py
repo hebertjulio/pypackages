@@ -58,7 +58,7 @@ class GithubInterface(object):
             fetch_schema_from_transport=True
         )
 
-    def get_releases(self, release_regex, repository_owner, repository_name):
+    def get_releases(self, repository_owner, repository_name, release_regex):
         query = gql(self.query % (repository_owner, repository_name))
         releases = self.client.execute(query)
         releases = releases['repository']['tags']['nodes']
@@ -99,9 +99,9 @@ class Command(BaseCommand):
         for package in packages:
             code_hosting = code_hostings[package.code_hosting]
             releases = code_hosting.get_releases(
-                package.release_regex,
-                package.repository_owner,
-                package.repository_name
+                package.repository_owner.strip(),
+                package.repository_name.strip(),
+                package.release_regex.strip(),
             )
             self.add_release(releases, package)
 
