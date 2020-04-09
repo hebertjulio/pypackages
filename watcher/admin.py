@@ -13,7 +13,7 @@ class PackageAdmin(admin.ModelAdmin):
         'name', 'repository',
     )
     readonly_fields = (
-        'created', 'modified',
+        'created', 'modified', 'hashtags'
     )
     list_filter = (
         'programming_language', 'code_hosting',

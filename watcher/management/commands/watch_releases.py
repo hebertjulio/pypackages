@@ -18,6 +18,13 @@ RELEASE_MIN_AGE = 15  # days
 class GithubInterface(object):
     query = '''{
         repository(owner: "%s", name: "%s") {
+            topics:repositoryTopics(first: 10) {
+                nodes {
+                  topic {
+                    name
+                  }
+                }
+            }
             tags:refs(refPrefix: "refs/tags/", first: 5, orderBy: {
             field: TAG_COMMIT_DATE, direction: DESC}) {
                 nodes {
@@ -40,6 +47,8 @@ class GithubInterface(object):
     }'''
 
     now = timezone.now()
+    releases = []
+    topics = []
 
     def __init__(self):
         access_token = settings.CODE_HOSTINGS['github']['ACCESS_TOKEN']
@@ -58,12 +67,25 @@ class GithubInterface(object):
             fetch_schema_from_transport=True
         )
 
-    def get_releases(self, repository_owner, repository_name, release_regex):
+    def load_repository(self, repository_owner, repository_name):
+        repository_owner = repository_owner.strip()
+        repository_name = repository_name.strip()
+
         query = gql(self.query % (repository_owner, repository_name))
-        releases = self.client.execute(query)
-        releases = releases['repository']['tags']['nodes']
+        payload = self.client.execute(query)
+
+        self.topics = payload['repository']['topics']['nodes']
+        self.releases = payload['repository']['tags']['nodes']
+
+    def get_topics(self):
+        for topic in self.topics:
+            yield topic['topic']['name']
+
+    def get_releases(self, release_regex):
+        release_regex = release_regex.strip()
         previous_prefix = set()
-        for release in releases:
+
+        for release in self.releases:
             created = parse_datetime(
                 release['target']['author']['date']
                 if 'author' in release['target']
@@ -85,6 +107,10 @@ class GithubInterface(object):
 class Command(BaseCommand):
     help = 'Watch for new releases in code hosting.'
 
+    chars = '@/_-#$%*!()&=+[]:;? '
+    trans = str.maketrans(
+        dict(zip(list(chars), ['' for v in range(len(chars))])))
+
     def handle(self, *args, **options):
         try:
             code_hostings = {
@@ -98,11 +124,24 @@ class Command(BaseCommand):
         packages = Package.objects.all()
         for package in packages:
             code_hosting = code_hostings[package.code_hosting]
-            releases = code_hosting.get_releases(
-                package.repository_owner.strip(),
-                package.repository_name.strip(),
-                package.release_regex.strip(),
+            code_hosting.load_repository(
+                package.repository_owner,
+                package.repository_name,
             )
+
+            hashtags = ' '.join(['#%s' % topic for topic in set([
+                topic.translate(self.trans)
+                for topic in code_hosting.get_topics()
+            ] + [
+                package.programming_language,
+                package.name.translate(self.trans)
+            ])])
+
+            if package.hashtags != hashtags:
+                package.hashtags = hashtags
+                package.save()
+
+            releases = code_hosting.get_releases(package.release_regex)
             self.add_release(releases, package)
 
     def add_release(self, releases, package):
