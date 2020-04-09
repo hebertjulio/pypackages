@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     text_template = (
         'The release of %s package %s is now available. 🥳'
-        '\n\n#%s #%s 😍'
+        '\n\n%s'
     )
 
     chars = '@/_-#$%*!()&=+[]:;? '
@@ -64,11 +64,10 @@ class Command(BaseCommand):
     def write_tweet(self, release, api):
         try:
             package_name = release.package.name
-            programming_language = release.package.programming_language
             release_name = release.name
+            hashtags = release.package.hashtags
             text = self.text_template % (
-                package_name, release_name, programming_language,
-                package_name.translate(self.trans))
+                package_name, release_name, hashtags)
             api.update_status(text)
             release.status = Release.STATUS.tweeted
             release.save()

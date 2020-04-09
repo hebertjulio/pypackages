@@ -37,6 +37,9 @@ class Package(TimeStampedModel):
             'v2.4.5 or 2.4.5 => ^v?((\\d+)(?:\\.\\d+)+)$ | '
             'v2.4.5rc1 or 2.4.5rc1 => ^v?((\\d+)(?:\\.\\d+)+\\w*)$')),
     )
+    hashtags = models.CharField(
+        _('hashtags'), max_length=255, blank=True
+    )
 
     def __str__(self):
         return self.name
