@@ -151,7 +151,8 @@ class Command(BaseCommand):
                 package.name.translate(self.trans)
             ])])
 
-            package.description = repository['description']
+            package.description = re.sub(
+                r':\w+:', '', repository['description'])
             package.home_page_url = repository['homepageUrl']
 
             while True:
