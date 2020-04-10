@@ -17,8 +17,7 @@ class Command(BaseCommand):
     help = 'Tweet new releases.'
 
     text_template = (
-        'The release of %s package %s is now available. 🥳'
-        '\n\n%s'
+        'The release of %s package %s is now available. 🥳\n\n%s'
     )
 
     chars = '@/_-#$%*!()&=+[]:;? '
@@ -40,7 +39,7 @@ class Command(BaseCommand):
                 created__lte=created, status=Release.STATUS.new
             ).order_by('created')[0:1]
             if releases:
-                self.write_tweet(releases[0], account['api'])
+                self.write_tweets(releases[0], account['api'])
 
     def get_accounts(self):
         if 'TWITTER_ACCOUNTS' in settings:
@@ -61,14 +60,36 @@ class Command(BaseCommand):
                         'api': tweepy.API(auth)
                     }
 
-    def write_tweet(self, release, api):
+    def write_tweets(self, release, api):
         try:
             package_name = release.package.name
+            package_description = release.package.description
+            package_home_page_url = release.package.home_page_url
+            package_hashtags = release.package.hashtags
+
             release_name = release.name
-            hashtags = release.package.hashtags
-            text = self.text_template % (
-                package_name, release_name, hashtags)
-            api.update_status(text)
+
+            text_tweet_one = (
+                'The release of %s package %s is now'
+                ' available. 🥳\n\n%s\n\n%s') % (
+                    package_name, release_name, package_hashtags,
+                    package_home_page_url)
+
+            status = api.update_status(text_tweet_one.strip())
+
+            if package_description.strip():
+                while True:
+                    text_tweet_two = '%s is,\n\n"%s"\n\n%s\n\n%s' % (
+                        package_name, package_description,
+                        package_hashtags, package_home_page_url)
+                    if len(text_tweet_two) <= 275:
+                        break
+                    package_description = package_description.split(' ')
+                    package_description = '%s...' % (
+                        ' '.join(package_description[:-1]))
+                api.update_status(
+                    text_tweet_two.strip(), in_reply_to_status_id=status.id)
+
             release.status = Release.STATUS.tweeted
             release.save()
         except Exception:
