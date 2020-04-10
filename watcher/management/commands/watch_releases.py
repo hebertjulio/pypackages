@@ -20,6 +20,7 @@ class GithubInterface(object):
         repository(owner: "%s", name: "%s") {
             description
             homepageUrl
+            url
             topics:repositoryTopics(first: 10) {
                 nodes {
                   topic {
@@ -81,7 +82,8 @@ class GithubInterface(object):
     def get_repository(self):
         return {
             'description': self.repository['description'] or '',
-            'homepageUrl': self.repository['homepageUrl'] or ''
+            'homepageUrl': self.repository[
+                'homepageUrl'] or self.repository['url']
         }
 
     def get_topics(self):
