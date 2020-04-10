@@ -6,8 +6,8 @@ from .models import Package, Release
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'programming_language', 'code_hosting',
-        'repository_owner', 'repository_name', 'release_regex'
+        'name', 'programming_language', 'repository_owner', 'repository_name',
+        'release_regex', 'description',
     )
     search_fields = (
         'name', 'repository',
@@ -17,7 +17,7 @@ class PackageAdmin(admin.ModelAdmin):
         'created', 'modified',
     )
     list_filter = (
-        'programming_language', 'code_hosting',
+        'programming_language',
     )
 
 
