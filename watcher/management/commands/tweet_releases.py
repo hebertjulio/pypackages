@@ -82,7 +82,7 @@ class Command(BaseCommand):
                     text_tweet_two = '%s is,\n\n"%s"\n\n%s\n\n%s' % (
                         package_name, package_description,
                         package_hashtags, package_home_page_url)
-                    if len(text_tweet_two) <= 275:
+                    if len(text_tweet_two) < 280:
                         break
                     package_description = package_description.split(' ')
                     package_description = '%s...' % (
