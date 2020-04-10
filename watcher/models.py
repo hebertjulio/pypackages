@@ -33,12 +33,16 @@ class Package(TimeStampedModel):
     )
     release_regex = models.CharField(
         _('release regex'), max_length=100,
-        help_text=(_(
-            'v2.4.5 or 2.4.5 => ^v?((\\d+)(?:\\.\\d+)+)$ | '
-            'v2.4.5rc1 or 2.4.5rc1 => ^v?((\\d+)(?:\\.\\d+)+\\w*)$')),
+        help_text=(_('Ex. ^v?((\\d+)(?:\\.\\d+)+)$')),
     )
     hashtags = models.CharField(
         _('hashtags'), max_length=255, blank=True
+    )
+    description = models.CharField(
+        _('description'), max_length=255, blank=True
+    )
+    home_page_url = models.URLField(
+        _('home page url'), max_length=255, blank=True
     )
 
     def __str__(self):
