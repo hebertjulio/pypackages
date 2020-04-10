@@ -64,17 +64,16 @@ class Command(BaseCommand):
         try:
             package = release.package.name
             description = release.package.description
-            home_page_url = release.package.home_page_url
+            site_url = release.package.site_url
             version = release.name
             hashtags = release.package.hashtags
             while True:
-                middle_text = '\n'.join([description, home_page_url])
-                middle_text = middle_text.strip()
-                middle_text = '\n%s\n' % middle_text if middle_text else ''
                 tweet_text = (
                     'The release of %s package %s is now'
-                    ' available. 🥳\n%s\n%s') % (
-                        package, version, middle_text, hashtags
+                    ' available. 🥳\n\n%s%s\n\n%s') % (
+                        package, version,
+                        '%s\n' % description if description else '',
+                        site_url, hashtags
                     )
                 if len(tweet_text) < 280:
                     api.update_status(tweet_text.strip())

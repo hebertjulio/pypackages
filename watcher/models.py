@@ -41,8 +41,8 @@ class Package(TimeStampedModel):
     description = models.CharField(
         _('description'), max_length=255, blank=True
     )
-    home_page_url = models.CharField(
-        _('home page url'), max_length=255, blank=True
+    site_url = models.CharField(
+        _('site url'), max_length=255, blank=True
     )
 
     def __str__(self):
