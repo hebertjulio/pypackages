@@ -80,8 +80,8 @@ class GithubInterface(object):
 
     def get_repository(self):
         return {
-            'description': self.repository['description'],
-            'homepageUrl': self.repository['homepageUrl']
+            'description': self.repository['description'].strip() or '',
+            'homepageUrl': self.repository['homepageUrl'].strip() or ''
         }
 
     def get_topics(self):
@@ -151,8 +151,16 @@ class Command(BaseCommand):
                 package.name.translate(self.trans)
             ])])
 
-            package.description = repository['description'] or ''
-            package.home_page_url = repository['homepageUrl'] or ''
+            package.description = repository['description']
+            package.home_page_url = repository['homepageUrl']
+
+            while True:
+                if len(package.description) < 255:
+                    break
+                package.description = package.description.split(' ')
+                package.description = '%s...' % (
+                    ' '.join(package.description[:-1]))
+
             package.hashtags = hashtags
             package.save()
 
