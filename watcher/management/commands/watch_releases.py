@@ -80,8 +80,8 @@ class GithubInterface(object):
 
     def get_repository(self):
         return {
-            'description': self.repository['description'].strip() or '',
-            'homepageUrl': self.repository['homepageUrl'].strip() or ''
+            'description': self.repository['description'] or '',
+            'homepageUrl': self.repository['homepageUrl'] or ''
         }
 
     def get_topics(self):
