@@ -70,10 +70,10 @@ class Command(BaseCommand):
             while True:
                 tweet_text = (
                     'The release of %s package %s is now'
-                    ' available. 🥳%s%s\n\n%s') % (
+                    ' available. 🥳\n%s%s\n%s') % (
                         package, version,
-                        '\n\n%s' % description if description else '',
-                        '\n%s' % home_page_url if home_page_url else '',
+                        '\n%s\n' % description if description else '',
+                        '\n%s\n' % home_page_url if home_page_url else '',
                         hashtags)
                 if len(tweet_text) < 280:
                     api.update_status(tweet_text.strip())
