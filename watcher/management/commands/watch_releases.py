@@ -152,7 +152,9 @@ class Command(BaseCommand):
             ])])
 
             package.description = re.sub(
-                r':\w+:', '', repository['description'])
+                r':\w+:', '', repository['description']).encode(
+                    'ascii', 'ignore').decode('ascii').strip()
+
             package.home_page_url = repository['homepageUrl']
 
             while True:
