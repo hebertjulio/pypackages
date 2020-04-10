@@ -18,6 +18,8 @@ RELEASE_MIN_AGE = 15  # days
 class GithubInterface(object):
     query = '''{
         repository(owner: "%s", name: "%s") {
+            description
+            homepageUrl
             topics:repositoryTopics(first: 10) {
                 nodes {
                   topic {
@@ -46,10 +48,6 @@ class GithubInterface(object):
         }
     }'''
 
-    now = timezone.now()
-    releases = []
-    topics = []
-
     def __init__(self):
         access_token = settings.CODE_HOSTINGS['github']['ACCESS_TOKEN']
         transport = RequestsHTTPTransport(
@@ -66,6 +64,8 @@ class GithubInterface(object):
             transport=transport,
             fetch_schema_from_transport=True
         )
+        self.trans = str.maketrans('_-', '..')
+        self.now = timezone.now()
 
     def load_repository(self, repository_owner, repository_name):
         repository_owner = repository_owner.strip()
@@ -74,8 +74,15 @@ class GithubInterface(object):
         query = gql(self.query % (repository_owner, repository_name))
         payload = self.client.execute(query)
 
+        self.repository = payload['repository']
         self.topics = payload['repository']['topics']['nodes']
         self.releases = payload['repository']['tags']['nodes']
+
+    def get_repository(self):
+        return {
+            'description': self.repository['description'],
+            'homepageUrl': self.repository['homepageUrl']
+        }
 
     def get_topics(self):
         for topic in self.topics:
@@ -99,7 +106,7 @@ class GithubInterface(object):
                     if current_prefix not in previous_prefix:
                         previous_prefix.add(current_prefix)
                         yield {
-                            'name': name.replace('_', '.'),
+                            'name': name.translate(self.trans),
                             'created': created
                         }
 
@@ -107,9 +114,12 @@ class GithubInterface(object):
 class Command(BaseCommand):
     help = 'Watch for new releases in code hosting.'
 
-    chars = '@/_-#$%*!()&=+[]:;? '
-    trans = str.maketrans(
-        dict(zip(list(chars), ['' for v in range(len(chars))])))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        characters = '@/_-#$%*!()&=+[]:;? '
+        self.trans = str.maketrans(
+            dict(zip(list(characters), [
+                '' for v in range(len(characters))])))
 
     def handle(self, *args, **options):
         try:
@@ -129,19 +139,23 @@ class Command(BaseCommand):
                 package.repository_name,
             )
 
+            repository = code_hosting.get_repository()
+            topics = code_hosting.get_topics()
+            releases = code_hosting.get_releases(package.release_regex)
+
             hashtags = ' '.join(['#%s' % topic for topic in set([
                 topic.translate(self.trans)
-                for topic in code_hosting.get_topics()
+                for topic in topics
             ] + [
                 package.programming_language,
                 package.name.translate(self.trans)
             ])])
 
-            if package.hashtags != hashtags:
-                package.hashtags = hashtags
-                package.save()
+            package.description = repository['description']
+            package.home_page_url = repository['homepageUrl']
+            package.hashtags = hashtags
+            package.save()
 
-            releases = code_hosting.get_releases(package.release_regex)
             self.add_release(releases, package)
 
     def add_release(self, releases, package):

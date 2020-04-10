@@ -38,6 +38,12 @@ class Package(TimeStampedModel):
     hashtags = models.CharField(
         _('hashtags'), max_length=255, blank=True
     )
+    description = models.CharField(
+        _('description'), max_length=255, blank=True
+    )
+    home_page_url = models.URLField(
+        _('home page url'), max_length=255, blank=True
+    )
 
     def __str__(self):
         return self.name

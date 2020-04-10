@@ -6,14 +6,15 @@ from .models import Package, Release
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'programming_language', 'code_hosting', 'repository_owner',
-        'repository_name', 'release_regex'
+        'name', 'programming_language', 'code_hosting',
+        'repository_owner', 'repository_name', 'release_regex'
     )
     search_fields = (
         'name', 'repository',
     )
     readonly_fields = (
-        'created', 'modified', 'hashtags'
+        'description', 'home_page_url', 'hashtags',
+        'created', 'modified',
     )
     list_filter = (
         'programming_language', 'code_hosting',
