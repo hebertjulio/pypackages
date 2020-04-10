@@ -82,7 +82,7 @@ class GithubInterface(object):
     def get_repository(self):
         return {
             'description': self.repository['description'] or '',
-            'homepageUrl': self.repository[
+            'site_url': self.repository[
                 'homepageUrl'] or self.repository['url']
         }
 
@@ -157,7 +157,7 @@ class Command(BaseCommand):
                 r':\w+:', '', repository['description']).encode(
                     'ascii', 'ignore').decode('ascii').strip()
 
-            package.home_page_url = repository['homepageUrl']
+            package.site_url = repository['site_url']
 
             while True:
                 if len(package.description) < 255:
