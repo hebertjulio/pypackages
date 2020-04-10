@@ -151,8 +151,8 @@ class Command(BaseCommand):
                 package.name.translate(self.trans)
             ])])
 
-            package.description = repository['description']
-            package.home_page_url = repository['homepageUrl']
+            package.description = repository['description'] or ''
+            package.home_page_url = repository['homepageUrl'] or ''
             package.hashtags = hashtags
             package.save()
 
