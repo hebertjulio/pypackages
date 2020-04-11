@@ -65,6 +65,9 @@ class GithubInterface(object):
             transport=transport,
             fetch_schema_from_transport=True
         )
+        self.repository = {}
+        self.topics = []
+        self.releases = []
         self.trans = str.maketrans('_-', '..')
         self.now = timezone.now()
 
