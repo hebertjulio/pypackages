@@ -34,7 +34,7 @@ def clean_recent_actions():
         print('clean_recent_actions failed %s' % e)
 
 
-@sched.scheduled_job('interval', seconds=6)
+@sched.scheduled_job('interval', hours=6)
 def clearsessions():
     try:
         start_time = time.time()
