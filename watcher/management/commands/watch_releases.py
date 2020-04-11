@@ -90,8 +90,8 @@ class GithubInterface:
         }
 
     def get_topics(self):
-        for topic in self.topics:
-            yield topic['topic']['name']
+        return [
+            topic['topic']['name'] for topic in self.topics]
 
     def get_releases(self, release_regex):
         release_regex = release_regex.strip()
@@ -148,13 +148,12 @@ class Command(BaseCommand):
             topics = code_hosting.get_topics()
             releases = code_hosting.get_releases(package.release_regex)
 
-            hashtags = ' '.join(['#%s' % topic for topic in set([
-                topic.translate(self.trans)
-                for topic in topics
-            ] + [
-                package.programming_language,
-                package.name.translate(self.trans)
-            ])])
+            hashtags = ' '.join(set(map(
+                lambda t: '#%s' % t.translate(self.trans), topics + [
+                    package.programming_language,
+                    package.name
+                ]
+            )))
 
             package.description = re.sub(
                 r':\w+:', '', repository['description']).encode(
