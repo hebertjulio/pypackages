@@ -13,7 +13,7 @@ try:
         '/usr/bin/which', 'pyenv'], shell=False)  # nosec
     args = [[*pyenv_path.strip()], *args]
 finally:
-    python_path = subprocess.check_output(['which', 'python'], shell=False)
+    python_path = subprocess.check_output(args, shell=False)  # nosec
     PYTHON_PATH = python_path.strip()
 
 
