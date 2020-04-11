@@ -12,12 +12,13 @@ try:
     pyenv_path = subprocess.check_output([
         '/usr/bin/which', 'pyenv'], shell=False)  # nosec
     args = [*[pyenv_path.strip(), 'which'], *args]
-except Exception:
+except subprocess.CalledProcessError:
     args = [*['/usr/bin/which'], *args]
 finally:
     python_path = subprocess.check_output(args, shell=False)  # nosec
     PYTHON_PATH = python_path.strip()
 
+print(PYTHON_PATH)
 
 @sched.scheduled_job('interval', hours=12)
 def watch_releases():
