@@ -8,7 +8,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job('interval', hours=6)
+@sched.scheduled_job('interval', hours=12)
 def watch_releases():
     try:
         start_time = time.time()
@@ -21,7 +21,7 @@ def watch_releases():
         print('watch_releases failed %s' % e)
 
 
-@sched.scheduled_job('interval', hours=6)
+@sched.scheduled_job('interval', hours=12)
 def clean_recent_actions():
     try:
         start_time = time.time()
@@ -34,7 +34,7 @@ def clean_recent_actions():
         print('clean_recent_actions failed %s' % e)
 
 
-@sched.scheduled_job('interval', hours=6)
+@sched.scheduled_job('interval', hours=12)
 def clearsessions():
     try:
         start_time = time.time()
@@ -47,7 +47,7 @@ def clearsessions():
         print('clearsessions failed %s' % e)
 
 
-@sched.scheduled_job('interval', minutes=15)
+@sched.scheduled_job('interval', minutes=30)
 def tweet_releases():
     try:
         start_time = time.time()
