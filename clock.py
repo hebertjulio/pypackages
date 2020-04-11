@@ -14,9 +14,9 @@ try:
     args = [*[pyenv_path.strip(), 'which'], *args]
 except subprocess.CalledProcessError:
     args = [*['/usr/bin/which'], *args]
-finally:
-    python_path = subprocess.check_output(args, shell=False)  # nosec
-    PYTHON_PATH = python_path.strip()
+
+python_path = subprocess.check_output(args, shell=False)  # nosec
+PYTHON_PATH = python_path.strip()
 
 
 @sched.scheduled_job('interval', hours=12)
