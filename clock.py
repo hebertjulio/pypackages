@@ -13,7 +13,7 @@ def watch_releases():
     try:
         start_time = time.time()
         subprocess.call(
-            'python ${PWD}/manage.py watch_releases; exit 0', shell=True)
+            'python ${PWD}/manage.py watch_releases', shell=False)
         print('watch_releases finished in %s seconds' % (
             time.time() - start_time))
     except Exception as e:
@@ -25,7 +25,7 @@ def clean_recent_actions():
     try:
         start_time = time.time()
         subprocess.call(
-            'python ${PWD}/manage.py clean_recent_actions; exit 0', shell=True)
+            'python ${PWD}/manage.py clean_recent_actions', shell=False)
         print('clean_recent_actions finished in %s seconds' % (
             time.time() - start_time))
     except Exception as e:
@@ -37,7 +37,7 @@ def clearsessions():
     try:
         start_time = time.time()
         subprocess.call(
-            'python ${PWD}/manage.py clearsessions; exit 0', shell=True)
+            'python ${PWD}/manage.py clearsessions', shell=False)
         print('clearsessions finished in %s seconds' % (
             time.time() - start_time))
     except Exception as e:
@@ -49,7 +49,7 @@ def tweet_releases():
     try:
         start_time = time.time()
         subprocess.call(
-            'python ${PWD}/manage.py tweet_releases; exit 0', shell=True)
+            'python ${PWD}/manage.py tweet_releases', shell=False)
         print('tweet_releases finished in %s seconds' % (
             time.time() - start_time))
     except Exception as e:
