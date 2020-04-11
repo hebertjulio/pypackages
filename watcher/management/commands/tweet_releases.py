@@ -27,11 +27,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             accounts = Command.get_accounts()
-            self.processing(accounts)
+            Command.processing(accounts)
         except KeyboardInterrupt:
             sys.exit(0)
 
-    def processing(self, accounts):
+    @staticmethod
+    def processing(accounts):
         created = timezone.now() - datetime.timedelta(days=RELEASE_MIN_AGE)
         for account in accounts:
             releases = Release.objects.filter(
