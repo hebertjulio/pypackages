@@ -9,7 +9,7 @@ from django.utils import timezone
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
-from ...models import Package, Release
+from watcher.models import Package, Release
 
 
 RELEASE_MIN_AGE = 15  # days

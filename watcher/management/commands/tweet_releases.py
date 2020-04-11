@@ -7,7 +7,7 @@ from django.utils import timezone
 
 import tweepy
 
-from ...models import Release
+from watcher.models import Release
 
 
 RELEASE_MIN_AGE = 1  # days
