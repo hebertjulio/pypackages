@@ -7,12 +7,23 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 
 sched = BlockingScheduler()
 
+args = ['which', 'python']
+try:
+    pyenv_path = subprocess.check_output([
+        '/usr/bin/which', 'pyenv'], shell=False)
+    args = [[*pyenv_path.strip()], *args]
+except Exception:
+    pass
+
+python_path = subprocess.check_output(['which', 'python'], shell=False)
+PYTHON_PATH = python_path.strip()
+
 
 @sched.scheduled_job('interval', hours=12)
 def watch_releases():
     start_time = time.time()
     subprocess.run([
-        'python', 'manage.py', 'watch_releases'],
+        PYTHON_PATH, 'manage.py', 'watch_releases'],
         shell=False)  # nosec
     print('watch_releases finished in %s seconds' % (
         time.time() - start_time))
@@ -22,7 +33,7 @@ def watch_releases():
 def clean_recent_actions():
     start_time = time.time()
     subprocess.run([
-        'python', 'manage.py', 'clean_recent_actions'],
+        PYTHON_PATH, 'manage.py', 'clean_recent_actions'],
         shell=False)  # nosec
     print('clean_recent_actions finished in %s seconds' % (
         time.time() - start_time))
@@ -32,7 +43,7 @@ def clean_recent_actions():
 def clearsessions():
     start_time = time.time()
     subprocess.run([
-        'python', 'manage.py', 'clearsessions'],
+        PYTHON_PATH, 'manage.py', 'clearsessions'],
         shell=False)  # nosec
     print('clearsessions finished in %s seconds' % (
         time.time() - start_time))
@@ -42,7 +53,7 @@ def clearsessions():
 def tweet_releases():
     start_time = time.time()
     subprocess.run([
-        'python', 'manage.py', 'tweet_releases'],
+        PYTHON_PATH, 'manage.py', 'tweet_releases'],
         shell=False)  # nosec
     print('tweet_releases finished in %s seconds' % (
         time.time() - start_time))
