@@ -7,7 +7,7 @@ from django.utils import timezone
 
 import tweepy
 
-from ...models import Release
+from watcher.models import Release
 
 
 RELEASE_MIN_AGE = 1  # days
@@ -26,12 +26,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            accounts = self.get_accounts()
-            self.processing(accounts)
+            accounts = Command.get_accounts()
+            Command.processing(accounts)
         except KeyboardInterrupt:
             sys.exit(0)
 
-    def processing(self, accounts):
+    @staticmethod
+    def processing(accounts):
         created = timezone.now() - datetime.timedelta(days=RELEASE_MIN_AGE)
         for account in accounts:
             releases = Release.objects.filter(
@@ -39,9 +40,10 @@ class Command(BaseCommand):
                 created__lte=created, status=Release.STATUS.new
             ).order_by('created')[0:1]
             if releases:
-                self.write_tweets(releases[0], account['api'])
+                Command.write_tweets(releases[0], account['api'])
 
-    def get_accounts(self):
+    @staticmethod
+    def get_accounts():
         if 'TWITTER_ACCOUNTS' in settings:
             for programming_language in ['python', 'javascript', 'css']:
                 if programming_language in settings['TWITTER_ACCOUNTS']:
@@ -60,28 +62,26 @@ class Command(BaseCommand):
                         'api': tweepy.API(auth)
                     }
 
-    def write_tweets(self, release, api):
-        try:
-            package = release.package.name
-            description = release.package.description
-            site_url = release.package.site_url
-            version = release.name
-            hashtags = release.package.hashtags
-            while True:
-                tweet_text = (
-                    'The release of %s package %s is now'
-                    ' available. 🥳\n\n%s%s\n\n%s') % (
-                        package, version,
-                        '%s\n' % description if description else '',
-                        site_url, hashtags
-                    )
-                if len(tweet_text) < 280:
-                    api.update_status(tweet_text.strip())
-                    break
-                description = description.split(' ')
-                description = '%s...' % (
-                    ' '.join(description[:-1]))
-            release.status = Release.STATUS.tweeted
-            release.save()
-        except Exception:
-            raise
+    @staticmethod
+    def write_tweets(release, api):
+        package = release.package.name
+        description = release.package.description
+        site_url = release.package.site_url
+        version = release.name
+        hashtags = release.package.hashtags
+        while True:
+            tweet_text = (
+                'The release of %s package %s is now'
+                ' available. 🥳\n\n%s%s\n\n%s') % (
+                    package, version,
+                    '%s\n' % description if description else '',
+                    site_url, hashtags
+                )
+            if len(tweet_text) < 280:
+                api.update_status(tweet_text.strip())
+                break
+            description = description.split(' ')
+            description = '%s...' % (
+                ' '.join(description[:-1]))
+        release.status = Release.STATUS.tweeted
+        release.save()

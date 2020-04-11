@@ -9,13 +9,13 @@ from django.utils import timezone
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
-from ...models import Package, Release
+from watcher.models import Package, Release
 
 
 RELEASE_MIN_AGE = 15  # days
 
 
-class GithubInterface(object):
+class GithubInterface:
     query = '''{
         repository(owner: "%s", name: "%s") {
             description
@@ -65,6 +65,9 @@ class GithubInterface(object):
             transport=transport,
             fetch_schema_from_transport=True
         )
+        self.repository = {}
+        self.topics = []
+        self.releases = []
         self.trans = str.maketrans('_-', '..')
         self.now = timezone.now()
 
@@ -169,9 +172,10 @@ class Command(BaseCommand):
             package.hashtags = hashtags
             package.save()
 
-            self.add_release(releases, package)
+            Command.add_release(releases, package)
 
-    def add_release(self, releases, package):
+    @staticmethod
+    def add_release(releases, package):
         for release in releases:
             release_exists = Release.objects.filter(
                 name=release['name'], package=package
