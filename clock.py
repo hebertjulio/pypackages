@@ -13,7 +13,7 @@ def watch_releases():
     try:
         start_time = time.time()
         subprocess.run([
-            '/usr/bin/python', 'manage.py', 'watch_releases'],
+            'python', 'manage.py', 'watch_releases'],
             shell=False)  # nosec
         print('watch_releases finished in %s seconds' % (
             time.time() - start_time))
@@ -26,7 +26,7 @@ def clean_recent_actions():
     try:
         start_time = time.time()
         subprocess.run([
-            '/usr/bin/python', 'manage.py', 'clean_recent_actions'],
+            'python', 'manage.py', 'clean_recent_actions'],
             shell=False)  # nosec
         print('clean_recent_actions finished in %s seconds' % (
             time.time() - start_time))
@@ -52,7 +52,7 @@ def tweet_releases():
     try:
         start_time = time.time()
         subprocess.run([
-            '/usr/bin/python', 'manage.py', 'tweet_releases'],
+            'python', 'manage.py', 'tweet_releases'],
             shell=False)  # nosec
         print('tweet_releases finished in %s seconds' % (
             time.time() - start_time))
