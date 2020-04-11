@@ -15,7 +15,7 @@ from ...models import Package, Release
 RELEASE_MIN_AGE = 15  # days
 
 
-class GithubInterface(object):
+class GithubInterface:
     query = '''{
         repository(owner: "%s", name: "%s") {
             description
