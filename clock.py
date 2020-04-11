@@ -10,54 +10,42 @@ sched = BlockingScheduler()
 
 @sched.scheduled_job('interval', hours=12)
 def watch_releases():
-    try:
-        start_time = time.time()
-        subprocess.run([
-            'python', 'manage.py', 'watch_releases'],
-            shell=False)  # nosec
-        print('watch_releases finished in %s seconds' % (
-            time.time() - start_time))
-    except Exception as e:
-        print('watch_releases failed %s' % e)
+    start_time = time.time()
+    subprocess.run([
+        'python', 'manage.py', 'watch_releases'],
+        shell=False)  # nosec
+    print('watch_releases finished in %s seconds' % (
+        time.time() - start_time))
 
 
 @sched.scheduled_job('interval', hours=12)
 def clean_recent_actions():
-    try:
-        start_time = time.time()
-        subprocess.run([
-            'python', 'manage.py', 'clean_recent_actions'],
-            shell=False)  # nosec
-        print('clean_recent_actions finished in %s seconds' % (
-            time.time() - start_time))
-    except Exception as e:
-        print('clean_recent_actions failed %s' % e)
+    start_time = time.time()
+    subprocess.run([
+        'python', 'manage.py', 'clean_recent_actions'],
+        shell=False)  # nosec
+    print('clean_recent_actions finished in %s seconds' % (
+        time.time() - start_time))
 
 
 @sched.scheduled_job('interval', hours=12)
 def clearsessions():
-    try:
-        start_time = time.time()
-        subprocess.run([
-            'python', 'manage.py', 'clearsessions'],
-            shell=False)  # nosec
-        print('clearsessions finished in %s seconds' % (
-            time.time() - start_time))
-    except Exception as e:
-        print('clearsessions failed %s' % e)
+    start_time = time.time()
+    subprocess.run([
+        'python', 'manage.py', 'clearsessions'],
+        shell=False)  # nosec
+    print('clearsessions finished in %s seconds' % (
+        time.time() - start_time))
 
 
 @sched.scheduled_job('interval', minutes=30)
 def tweet_releases():
-    try:
-        start_time = time.time()
-        subprocess.run([
-            'python', 'manage.py', 'tweet_releases'],
-            shell=False)  # nosec
-        print('tweet_releases finished in %s seconds' % (
-            time.time() - start_time))
-    except Exception as e:
-        print('tweet_releases failed %s' % e)
+    start_time = time.time()
+    subprocess.run([
+        'python', 'manage.py', 'tweet_releases'],
+        shell=False)  # nosec
+    print('tweet_releases finished in %s seconds' % (
+        time.time() - start_time))
 
 
 try:
