@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            accounts = self.get_accounts()
+            accounts = Command.get_accounts()
             self.processing(accounts)
         except KeyboardInterrupt:
             sys.exit(0)
@@ -39,9 +39,10 @@ class Command(BaseCommand):
                 created__lte=created, status=Release.STATUS.new
             ).order_by('created')[0:1]
             if releases:
-                self.write_tweets(releases[0], account['api'])
+                Command.write_tweets(releases[0], account['api'])
 
-    def get_accounts(self):
+    @staticmethod
+    def get_accounts():
         if 'TWITTER_ACCOUNTS' in settings:
             for programming_language in ['python', 'javascript', 'css']:
                 if programming_language in settings['TWITTER_ACCOUNTS']:
@@ -60,7 +61,8 @@ class Command(BaseCommand):
                         'api': tweepy.API(auth)
                     }
 
-    def write_tweets(self, release, api):
+    @staticmethod
+    def write_tweets(release, api):
         package = release.package.name
         description = release.package.description
         site_url = release.package.site_url

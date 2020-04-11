@@ -172,9 +172,10 @@ class Command(BaseCommand):
             package.hashtags = hashtags
             package.save()
 
-            self.add_release(releases, package)
+            Command.add_release(releases, package)
 
-    def add_release(self, releases, package):
+    @staticmethod
+    def add_release(releases, package):
         for release in releases:
             release_exists = Release.objects.filter(
                 name=release['name'], package=package
