@@ -7,16 +7,14 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 
 sched = BlockingScheduler()
 
-args = ['which', 'python']
+args = ['/usr/bin/which', 'python']
 try:
     pyenv_path = subprocess.check_output([
-        '/usr/bin/which', 'pyenv'], shell=False)
+        '/usr/bin/which', 'pyenv'], shell=False)  # nosec
     args = [[*pyenv_path.strip()], *args]
-except Exception:
-    pass
-
-python_path = subprocess.check_output(['which', 'python'], shell=False)
-PYTHON_PATH = python_path.strip()
+finally:
+    python_path = subprocess.check_output(['which', 'python'], shell=False)
+    PYTHON_PATH = python_path.strip()
 
 
 @sched.scheduled_job('interval', hours=12)
