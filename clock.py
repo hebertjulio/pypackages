@@ -21,6 +21,7 @@ PYTHON_PATH = python_path.strip()
 
 @sched.scheduled_job('interval', hours=12)
 def watch_releases():
+    """ Watching for new relases in code hostings. """
     start_time = time.time()
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'watch_releases'],
@@ -31,6 +32,7 @@ def watch_releases():
 
 @sched.scheduled_job('interval', hours=12)
 def clean_recent_actions():
+    """ Clear all recent actions. """
     start_time = time.time()
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'clean_recent_actions'],
@@ -41,6 +43,7 @@ def clean_recent_actions():
 
 @sched.scheduled_job('interval', hours=12)
 def clearsessions():
+    """ Clear all invalid sessions. """
     start_time = time.time()
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'clearsessions'],
@@ -51,6 +54,7 @@ def clearsessions():
 
 @sched.scheduled_job('interval', minutes=30)
 def tweet_releases():
+    """ Tweet one new release by programming language. """
     start_time = time.time()
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'tweet_releases'],
