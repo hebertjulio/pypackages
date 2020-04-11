@@ -18,7 +18,6 @@ finally:
     python_path = subprocess.check_output(args, shell=False)  # nosec
     PYTHON_PATH = python_path.strip()
 
-print(PYTHON_PATH)
 
 @sched.scheduled_job('interval', hours=12)
 def watch_releases():
