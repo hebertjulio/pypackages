@@ -61,27 +61,24 @@ class Command(BaseCommand):
                     }
 
     def write_tweets(self, release, api):
-        try:
-            package = release.package.name
-            description = release.package.description
-            site_url = release.package.site_url
-            version = release.name
-            hashtags = release.package.hashtags
-            while True:
-                tweet_text = (
-                    'The release of %s package %s is now'
-                    ' available. 🥳\n\n%s%s\n\n%s') % (
-                        package, version,
-                        '%s\n' % description if description else '',
-                        site_url, hashtags
-                    )
-                if len(tweet_text) < 280:
-                    api.update_status(tweet_text.strip())
-                    break
-                description = description.split(' ')
-                description = '%s...' % (
-                    ' '.join(description[:-1]))
-            release.status = Release.STATUS.tweeted
-            release.save()
-        except Exception:
-            raise
+        package = release.package.name
+        description = release.package.description
+        site_url = release.package.site_url
+        version = release.name
+        hashtags = release.package.hashtags
+        while True:
+            tweet_text = (
+                'The release of %s package %s is now'
+                ' available. 🥳\n\n%s%s\n\n%s') % (
+                    package, version,
+                    '%s\n' % description if description else '',
+                    site_url, hashtags
+                )
+            if len(tweet_text) < 280:
+                api.update_status(tweet_text.strip())
+                break
+            description = description.split(' ')
+            description = '%s...' % (
+                ' '.join(description[:-1]))
+        release.status = Release.STATUS.tweeted
+        release.save()
