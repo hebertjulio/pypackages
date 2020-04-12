@@ -81,16 +81,30 @@ class GithubInterface:
         self.topics = payload['repository']['topics']['nodes']
         self.releases = payload['repository']['tags']['nodes']
 
-    def get_repository(self):
+    def get_repoinfo(self):
         return {
             'description': self.repository['description'] or '',
             'site_url': self.repository[
                 'homepageUrl'] or self.repository['url']
         }
 
-    def get_topics(self):
+    def get_hasttags(self, extra_topics=[]):
+        hashtags = set()
         for topic in self.topics:
-            yield '#' + topic['topic']['name']
+            hashtag = '#' + topic['topic']['name']
+            hashtag = hashtag.lower()
+            hashtag = hashtag.replace('-', '')
+            hashtag = hashtag.replace('_', '')
+            hashtags.add(hashtag)
+        for topic in extra_topics:
+            hashtag = '#' + topic
+            hashtag = hashtag.lower()
+            hashtag = hashtag.replace('-', '')
+            hashtag = hashtag.replace('_', '')
+            hashtag = hashtag.replace('@', '')
+            hashtag = hashtag.replace('/', '')
+            hashtags.add(hashtag)
+        return ' '.join(hashtags)
 
     def get_releases(self, release_regex):
         release_regex = release_regex.strip()
@@ -109,7 +123,7 @@ class GithubInterface:
                 if current_prefix not in previous_prefix:
                     previous_prefix.append(current_prefix)
                     yield {
-                        'name': name.replace('_', '.'),
+                        'name': name.replace('_', '.').replace('-', '.'),
                         'created': created
                     }
 
@@ -136,19 +150,16 @@ class Command(BaseCommand):
                 package.repository_name,
             )
 
-            repository = code_hosting.get_repository()
+            repoinfo = code_hosting.get_repoinfo()
             releases = code_hosting.get_releases(package.release_regex)
 
-            hashtags = ' '.join(code_hosting.get_topics())
-            hashtags += ' #' + package.programming_language
-            hashtags += ' #' + package.name
-
-            hashtags = hashtags.lower()
-            hashtags = hashtags.replace('-', '').replace(
-                '-', '').replace('@', '').replace('/', '')
+            hashtags = code_hosting.get_hasttags([
+                package.programming_language,
+                package.name
+            ])
 
             description = re.sub(
-                r':\w+:', '', repository['description']
+                r':\w+:', '', repoinfo['description']
             ).encode('ascii', 'ignore').decode('ascii').strip()
 
             while True:
@@ -159,7 +170,7 @@ class Command(BaseCommand):
 
             package.description = description
             package.hashtags = hashtags
-            package.site_url = repository['site_url']
+            package.site_url = repoinfo['site_url']
             package.save()
 
             Command.add_release(releases, package)
