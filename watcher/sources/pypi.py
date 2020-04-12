@@ -62,6 +62,7 @@ class PyPiSource:
             matches = re.search(r'github\.com/([\w_-]+/[\w_-]+)', url)
             if matches is not None:
                 return matches.group(1)
+        return None
 
     @staticmethod
     def get_topics(repository):
