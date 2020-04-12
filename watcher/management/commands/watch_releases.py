@@ -48,12 +48,12 @@ class Command(BaseCommand):
                 package.save()
 
                 Command.add_release(info['releases'], package)
-            except RequestException as e:
+            except RequestException:
                 subject = '[watch_releases] package: ' + package.name
-                send_manually_exception_email(subject, e)
-            except JSONDecodeError as e:
+                send_manually_exception_email(subject)
+            except JSONDecodeError:
                 subject = '[watch_releases] package: ' + package.name
-                send_manually_exception_email(subject, e)
+                send_manually_exception_email(subject)
 
     @staticmethod
     def add_release(releases, package):
