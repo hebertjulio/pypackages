@@ -65,7 +65,8 @@ class Github:
             fetch_schema_from_transport=True
         )
 
-    def get_info(self, package):
+    @staticmethod
+    def get_info(package):
         info = Github.request(*package.source_id.split('/'))
         hashtags = Github.get_hasttags(
             info['topics']['nodes'], [

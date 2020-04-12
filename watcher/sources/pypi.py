@@ -12,7 +12,8 @@ class PyPi:
 
     now = timezone.now()
 
-    def get_info(self, package):
+    @staticmethod
+    def get_info(package):
         info = PyPi.request(package)
         hashtags = PyPi.get_hasttags([], [
                 package.programming_language,
