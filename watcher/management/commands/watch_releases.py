@@ -88,7 +88,7 @@ class GithubInterface:
                 'homepageUrl'] or self.repository['url']
         }
 
-    def get_hasttags(self, extra_topics=[]):
+    def get_hasttags(self, extra_topics):
         hashtags = set()
         for topic in self.topics:
             hashtag = '#' + topic['topic']['name']
