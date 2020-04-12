@@ -45,6 +45,7 @@ class Command(BaseCommand):
                 package.description = description
                 package.hashtags = info['hashtags']
                 package.site_url = info['site_url']
+
                 package.save()
 
                 Command.add_release(info['releases'], package)

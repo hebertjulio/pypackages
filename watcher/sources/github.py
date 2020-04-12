@@ -8,31 +8,37 @@ from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
 
-class GithubConn:
+class GithubClient:
 
     client = None
     access_token = settings.CODE_HOSTINGS['github']['ACCESS_TOKEN']
 
     @staticmethod
     def get_client():
-        if GithubConn.client is None:
+        if GithubClient.client is None:
             transport = RequestsHTTPTransport(
                 url='https://api.github.com/graphql', use_json=True,
                 headers={
-                    'Authorization': 'bearer %s' % GithubConn.access_token,
+                    'Authorization': 'bearer %s' % GithubClient.access_token,
                     'Content-type': 'application/json',
                 }, verify=True
             )
-            GithubConn.client = Client(
+            GithubClient.client = Client(
                 retries=3, transport=transport,
                 fetch_schema_from_transport=True
             )
-        return GithubConn.client
+        return GithubClient.client
+
+    @staticmethod
+    def execute(gql_query):
+        client = GithubClient.get_client()
+        resp = client.execute(gql(gql_query))
+        return resp
 
 
 class GithubSource:
 
-    query = '''{
+    gql_query = '''{
         repository(owner: "%s", name: "%s") {
             description
             homepageUrl
@@ -90,11 +96,10 @@ class GithubSource:
 
     @staticmethod
     def request(repository_owner, repository_name):
-        query = gql(GithubSource.query % (
-                repository_owner, repository_name
-            )
+        gql_query = GithubSource.gql_query % (
+            repository_owner, repository_name
         )
-        resp = GithubConn.get_client().execute(query)
+        resp = GithubClient.execute(gql_query)
         return resp['repository']
 
     @staticmethod

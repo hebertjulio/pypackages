@@ -5,8 +5,22 @@ from django.utils import timezone
 
 import requests
 
+from .github import GithubClient
+
 
 class PyPiSource:
+
+    gql_query = '''{
+        repository(owner: "%s", name: "%s") {
+            topics:repositoryTopics(first: 10) {
+                nodes {
+                  topic {
+                    name
+                  }
+                }
+            }
+        }
+    }'''
 
     RELEASE_MIN_AGE = 15
 
@@ -15,25 +29,49 @@ class PyPiSource:
     @staticmethod
     def get_info(package):
         info = PyPiSource.request(package)
-        hashtags = PyPiSource.get_hasttags([], [
-                package.programming_language,
-                package.name
-        ])
         releases = PyPiSource.get_releases(
             info['releases'], package.release_regex
         )
+        repository = PyPiSource.get_repository(
+            info['info']['project_urls']
+        )
+        topics = [topic for topic in PyPiSource.get_topics(
+            repository
+        )]
+        hashtags = PyPiSource.get_hasttags(topics, [
+                package.programming_language,
+                package.name
+        ])
         return {
             'description': info['info']['summary'] or '',
             'site_url': info[
                 'info']['home_page'] or info[
                 'info']['project_url'],
-            'hashtags': hashtags, 'releases': releases,
+            'hashtags': hashtags, 'releases': releases
         }
 
     @staticmethod
     def request(package):
-        resp = requests.get('https://pypi.org/pypi/%s/json' % package.name)
+        resp = requests.get(
+            'https://pypi.org/pypi/%s/json' % package.source_id)
         return resp.json()
+
+    @staticmethod
+    def get_repository(project_urls):
+        for url in project_urls.values():
+            matches = re.search(r'github\.com/([\w_-]+/[\w_-]+)', url)
+            if matches is not None:
+                return matches.group(1)
+
+    @staticmethod
+    def get_topics(repository):
+        if repository is not None:
+            repository_owner, repository_name = repository.split('/')
+            gql_query = PyPiSource.gql_query % (
+                repository_owner, repository_name)
+            resp = GithubClient.execute(gql_query)
+            for node in resp['repository']['topics']['nodes']:
+                yield node['topic']['name']
 
     @staticmethod
     def get_hasttags(topics, extra_topics):
