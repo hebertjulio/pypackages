@@ -1,5 +1,5 @@
-from .github import Github
-from .pypi import PyPi
+from .github import GithubSource
+from .pypi import PyPiSource
 
 
-__all__ = ['Github', 'PyPi']
+__all__ = ['GithubSource', 'PyPiSource']

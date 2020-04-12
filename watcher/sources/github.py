@@ -8,9 +8,37 @@ from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
 
-class Github:
+class GithubClient:
 
-    query = '''{
+    client = None
+    access_token = settings.CODE_HOSTINGS['github']['ACCESS_TOKEN']
+
+    @staticmethod
+    def get_client():
+        if GithubClient.client is None:
+            transport = RequestsHTTPTransport(
+                url='https://api.github.com/graphql', use_json=True,
+                headers={
+                    'Authorization': 'bearer %s' % GithubClient.access_token,
+                    'Content-type': 'application/json',
+                }, verify=True
+            )
+            GithubClient.client = Client(
+                retries=3, transport=transport,
+                fetch_schema_from_transport=True
+            )
+        return GithubClient.client
+
+    @staticmethod
+    def execute(gql_query):
+        client = GithubClient.get_client()
+        resp = client.execute(gql(gql_query))
+        return resp
+
+
+class GithubSource:
+
+    gql_query = '''{
         repository(owner: "%s", name: "%s") {
             description
             homepageUrl
@@ -45,36 +73,18 @@ class Github:
 
     RELEASE_MIN_AGE = 15
 
-    client = None
     now = timezone.now()
-
-    def __init__(self):
-        access_token = settings.CODE_HOSTINGS['github']['ACCESS_TOKEN']
-        transport = RequestsHTTPTransport(
-            url='https://api.github.com/graphql',
-            use_json=True,
-            headers={
-                'Authorization': 'bearer %s' % access_token,
-                'Content-type': 'application/json',
-            },
-            verify=True
-        )
-        Github.client = Client(
-            retries=3,
-            transport=transport,
-            fetch_schema_from_transport=True
-        )
 
     @staticmethod
     def get_info(package):
-        info = Github.request(*package.source_id.split('/'))
-        hashtags = Github.get_hasttags(
+        info = GithubSource.request(*package.source_id.split('/'))
+        hashtags = GithubSource.get_hasttags(
             info['topics']['nodes'], [
                 package.programming_language,
                 package.name
             ]
         )
-        releases = Github.get_releases(
+        releases = GithubSource.get_releases(
             info['tags']['nodes'],
             package.release_regex
         )
@@ -86,10 +96,10 @@ class Github:
 
     @staticmethod
     def request(repository_owner, repository_name):
-        query = gql(Github.query % (
-            repository_owner, repository_name)
+        gql_query = GithubSource.gql_query % (
+            repository_owner, repository_name
         )
-        resp = Github.client.execute(query)
+        resp = GithubClient.execute(gql_query)
         return resp['repository']
 
     @staticmethod
@@ -114,8 +124,8 @@ class Github:
                 release['target']['tagger']['date']
                 if 'tagger' in release['target']
                 else release['target']['author']['date'])
-            age = abs(Github.now - created).days
-            if age > Github.RELEASE_MIN_AGE:
+            age = abs(GithubSource.now - created).days
+            if age > GithubSource.RELEASE_MIN_AGE:
                 break
             matches = re.search(release_regex, release['name'])
             if matches is not None:
