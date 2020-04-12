@@ -7,7 +7,7 @@ from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
 
 from watcher.models import Package, Release
-from watcher.sources import Github, PyPi
+from watcher.sources import GithubSource, PyPiSource
 from watcher.services import send_manually_exception_email
 
 
@@ -17,8 +17,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             sources = {
-                'github': Github(),
-                'pypi': PyPi(),
+                'github': GithubSource(),
+                'pypi': PyPiSource(),
             }
             Command.processing(sources)
         except KeyboardInterrupt:

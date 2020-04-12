@@ -6,7 +6,7 @@ from django.utils import timezone
 import requests
 
 
-class PyPi:
+class PyPiSource:
 
     RELEASE_MIN_AGE = 15
 
@@ -14,12 +14,12 @@ class PyPi:
 
     @staticmethod
     def get_info(package):
-        info = PyPi.request(package)
-        hashtags = PyPi.get_hasttags([], [
+        info = PyPiSource.request(package)
+        hashtags = PyPiSource.get_hasttags([], [
                 package.programming_language,
                 package.name
         ])
-        releases = PyPi.get_releases(
+        releases = PyPiSource.get_releases(
             info['releases'], package.release_regex
         )
         return {
@@ -55,8 +55,8 @@ class PyPi:
             if releases[name]:
                 info = releases[name][0]
                 created = parse_datetime(info['upload_time_iso_8601'])
-                age = abs(PyPi.now - created).days
-                if age > PyPi.RELEASE_MIN_AGE:
+                age = abs(PyPiSource.now - created).days
+                if age > PyPiSource.RELEASE_MIN_AGE:
                     continue
                 matches = re.search(release_regex, name)
                 if matches is not None:
