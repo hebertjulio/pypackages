@@ -57,7 +57,7 @@ class Package(TimeStampedModel):
         verbose_name_plural = _('packages')
         unique_together = [
             ['name', 'programming_language'],
-            # ['source_type', 'source_id'],
+            ['source_type', 'source_id'],
         ]
         ordering = [
             'name',
