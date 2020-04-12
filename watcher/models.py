@@ -32,12 +32,6 @@ class Package(TimeStampedModel):
             'Repository owner/name of Github, or '
             'package name if PyPi'))
     )
-    repository_owner = models.CharField(
-        _('repository owner'), max_length=100
-    )
-    repository_name = models.CharField(
-        _('repository name'), max_length=100
-    )
     release_regex = models.CharField(
         _('release regex'), max_length=100,
         help_text=_('Ex. ^v?((\\d+)(?:\\.\\d+)+)$'),
