@@ -1,16 +1,11 @@
 import sys
-import datetime
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from django.utils import timezone
 
 import tweepy
 
 from watcher.models import Release
-
-
-RELEASE_MIN_AGE = 0  # days
 
 
 class Command(BaseCommand):
@@ -33,11 +28,10 @@ class Command(BaseCommand):
 
     @staticmethod
     def processing(accounts):
-        created = timezone.now() - datetime.timedelta(days=RELEASE_MIN_AGE)
         for account in accounts:
             releases = Release.objects.filter(
                 package__programming_language=account['programming_language'],
-                created__lte=created, status=Release.STATUS.new
+                status=Release.STATUS.new
             ).order_by('created')[0:1]
             if releases:
                 Command.write_tweets(releases[0], account['api'])
