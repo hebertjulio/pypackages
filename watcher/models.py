@@ -12,8 +12,9 @@ class Package(TimeStampedModel):
         ('css', 'css'),
     )
 
-    CODE_HOSTING = Choices(
+    SOURCE_TYPE = Choices(
         ('github', 'github'),
+        ('pypi', 'pypi'),
     )
 
     name = models.CharField(
@@ -22,8 +23,14 @@ class Package(TimeStampedModel):
     programming_language = models.CharField(
         _('programming language'), max_length=50, choices=PROGRAMMING_LANGUAGE
     )
-    code_hosting = models.CharField(
-        _('code hosting'), max_length=50, choices=CODE_HOSTING
+    source_type = models.CharField(
+        _('source type'), max_length=50, choices=SOURCE_TYPE
+    )
+    source_id = models.CharField(
+        _('source id'), max_length=200,
+        help_text=_((
+            'Repository owner/name of Github, or '
+            'package name if PyPi'))
     )
     repository_owner = models.CharField(
         _('repository owner'), max_length=100
@@ -33,7 +40,7 @@ class Package(TimeStampedModel):
     )
     release_regex = models.CharField(
         _('release regex'), max_length=100,
-        help_text=(_('Ex. ^v?((\\d+)(?:\\.\\d+)+)$')),
+        help_text=_('Ex. ^v?((\\d+)(?:\\.\\d+)+)$'),
     )
     hashtags = models.CharField(
         _('hashtags'), max_length=255, blank=True
@@ -56,7 +63,7 @@ class Package(TimeStampedModel):
         verbose_name_plural = _('packages')
         unique_together = [
             ['name', 'programming_language'],
-            ['code_hosting', 'repository_owner', 'repository_name'],
+            # ['source_type', 'source_id'],
         ]
         ordering = [
             'name',
