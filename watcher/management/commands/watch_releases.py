@@ -100,17 +100,18 @@ class GithubInterface:
                 release['target']['tagger']['date']
                 if 'tagger' in release['target']
                 else release['target']['author']['date'])
-            if abs(self.now - created).days <= RELEASE_MIN_AGE:
-                matches = re.search(release_regex, release['name'])
-                if matches is not None:
-                    current_prefix = matches.group(2)
-                    name = matches.group(1)
-                    if current_prefix not in previous_prefix:
-                        previous_prefix.append(current_prefix)
-                        yield {
-                            'name': name.replace('_', '.'),
-                            'created': created
-                        }
+            if abs(self.now - created).days > RELEASE_MIN_AGE:
+                break
+            matches = re.search(release_regex, release['name'])
+            if matches is not None:
+                current_prefix = matches.group(2)
+                name = matches.group(1)
+                if current_prefix not in previous_prefix:
+                    previous_prefix.append(current_prefix)
+                    yield {
+                        'name': name.replace('_', '.'),
+                        'created': created
+                    }
 
 
 class Command(BaseCommand):
