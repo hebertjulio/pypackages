@@ -68,7 +68,6 @@ class GithubInterface:
         self.repository = {}
         self.topics = []
         self.releases = []
-        self.trans = str.maketrans('_-', '..')
         self.now = timezone.now()
 
     def load_repository(self, repository_owner, repository_name):
@@ -90,52 +89,45 @@ class GithubInterface:
         }
 
     def get_topics(self):
-        return [
-            topic['topic']['name'] for topic in self.topics]
+        for topic in self.topics:
+            yield '#' + topic['topic']['name']
 
     def get_releases(self, release_regex):
         release_regex = release_regex.strip()
-        previous_prefix = set()
-
+        previous_prefix = []
         for release in self.releases:
             created = parse_datetime(
-                release['target']['author']['date']
-                if 'author' in release['target']
-                else release['target']['tagger']['date']
-            )
-            if abs(self.now - created).days <= RELEASE_MIN_AGE:
-                matches = re.search(release_regex, release['name'])
-                if matches is not None:
-                    current_prefix = matches.group(2)
-                    name = matches.group(1)
-                    if current_prefix not in previous_prefix:
-                        previous_prefix.add(current_prefix)
-                        yield {
-                            'name': name.translate(self.trans),
-                            'created': created
-                        }
+                release['target']['tagger']['date']
+                if 'tagger' in release['target']
+                else release['target']['author']['date'])
+            if abs(self.now - created).days > RELEASE_MIN_AGE:
+                break
+            matches = re.search(release_regex, release['name'])
+            if matches is not None:
+                current_prefix = matches.group(2)
+                name = matches.group(1)
+                if current_prefix not in previous_prefix:
+                    previous_prefix.append(current_prefix)
+                    yield {
+                        'name': name.replace('_', '.'),
+                        'created': created
+                    }
 
 
 class Command(BaseCommand):
     help = 'Watch for new releases in code hosting.'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        characters = '@/_-#$%*!()&=+[]:;? '
-        self.trans = str.maketrans(
-            dict(zip(list(characters), [
-                '' for v in range(len(characters))])))
 
     def handle(self, *args, **options):
         try:
             code_hostings = {
                 'github': GithubInterface(),
             }
-            self.processing(code_hostings)
+            Command.processing(code_hostings)
         except KeyboardInterrupt:
             sys.exit(0)
 
-    def processing(self, code_hostings):
+    @staticmethod
+    def processing(code_hostings):
         packages = Package.objects.all()
         for package in packages:
             code_hosting = code_hostings[package.code_hosting]
@@ -145,30 +137,29 @@ class Command(BaseCommand):
             )
 
             repository = code_hosting.get_repository()
-            topics = code_hosting.get_topics()
             releases = code_hosting.get_releases(package.release_regex)
 
-            hashtags = ' '.join(set(map(
-                lambda t: '#%s' % t.translate(self.trans), topics + [
-                    package.programming_language,
-                    package.name
-                ]
-            )))
+            hashtags = ' '.join(code_hosting.get_topics())
+            hashtags += ' #' + package.programming_language
+            hashtags += ' #' + package.name
 
-            package.description = re.sub(
-                r':\w+:', '', repository['description']).encode(
-                    'ascii', 'ignore').decode('ascii').strip()
+            hashtags = hashtags.lower()
+            hashtags = hashtags.replace('-', '').replace(
+                '-', '').replace('@', '').replace('/', '')
 
-            package.site_url = repository['site_url']
+            description = re.sub(
+                r':\w+:', '', repository['description']
+            ).encode('ascii', 'ignore').decode('ascii').strip()
 
             while True:
-                if len(package.description) < 255:
+                if len(description) < 255:
                     break
-                package.description = package.description.split(' ')
-                package.description = '%s...' % (
-                    ' '.join(package.description[:-1]))
+                description = description.split(' ')
+                description = ' '.join(description[:-1]) + '...'
 
+            package.description = description
             package.hashtags = hashtags
+            package.site_url = repository['site_url']
             package.save()
 
             Command.add_release(releases, package)
