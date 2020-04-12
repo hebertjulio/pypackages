@@ -10,7 +10,7 @@ import tweepy
 from watcher.models import Release
 
 
-RELEASE_MIN_AGE = 1  # days
+RELEASE_MIN_AGE = 0  # days
 
 
 class Command(BaseCommand):
