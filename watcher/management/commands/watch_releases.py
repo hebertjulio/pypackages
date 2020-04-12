@@ -3,8 +3,12 @@ import re
 
 from django.core.management.base import BaseCommand
 
+from json.decoder import JSONDecodeError
+from requests.exceptions import RequestException
+
 from watcher.models import Package, Release
 from watcher.sources import Github, PyPi
+from watcher.services import send_manually_exception_email
 
 
 class Command(BaseCommand):
@@ -22,27 +26,34 @@ class Command(BaseCommand):
 
     @staticmethod
     def processing(sources):
-        packages = Package.objects.all()
+        packages = Package.objects.all().order_by('source_type')
         for package in packages:
-            source = sources[package.source_type]
-            info = source.get_info(package)
+            try:
+                source = sources[package.source_type]
+                info = source.get_info(package)
 
-            description = re.sub(
-                r':\w+:', '', info['description']
-            ).encode('ascii', 'ignore').decode('ascii').strip()
+                description = re.sub(
+                    r':\w+:', '', info['description']
+                ).encode('ascii', 'ignore').decode('ascii').strip()
 
-            while True:
-                if len(description) < 255:
-                    break
-                description = description.split(' ')
-                description = ' '.join(description[:-1]) + '...'
+                while True:
+                    if len(description) < 255:
+                        break
+                    description = description.split(' ')
+                    description = ' '.join(description[:-1]) + '...'
 
-            package.description = description
-            package.hashtags = info['hashtags']
-            package.site_url = info['site_url']
-            package.save()
+                package.description = description
+                package.hashtags = info['hashtags']
+                package.site_url = info['site_url']
+                package.save()
 
-            Command.add_release(info['releases'], package)
+                Command.add_release(info['releases'], package)
+            except RequestException:
+                subject = '[watch_releases] package: ' + package.name
+                send_manually_exception_email(subject)
+            except JSONDecodeError:
+                subject = '[watch_releases] package: ' + package.name
+                send_manually_exception_email(subject)
 
     @staticmethod
     def add_release(releases, package):
