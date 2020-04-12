@@ -6,11 +6,11 @@ from .models import Package, Release
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'programming_language', 'repository_owner',
-        'repository_name', 'release_regex',
+        'name', 'programming_language', 'source_type',
+        'source_id', 'release_regex',
     )
     search_fields = (
-        'name', 'repository',
+        'name', 'source_id',
     )
     readonly_fields = (
         'description', 'site_url', 'hashtags',
@@ -18,6 +18,7 @@ class PackageAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'programming_language',
+        'source_type',
     )
 
 
