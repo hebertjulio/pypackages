@@ -30,49 +30,55 @@ class PyPiSource:
     def get_info(package):
         info = PyPiSource.request(package)
 
+        if not package.code_hosting_repository:
+            code_hosting_repository = PyPiSource.get_code_hosting_repository(
+                info['info']['project_urls'])
+        else:
+            code_hosting_repository = package.code_hosting_repository
+
+        if code_hosting_repository is not None:
+            tags = PyPiSource.get_code_hosting_topics(
+                code_hosting_repository)
+        else:
+            tags = []
+
         releases = PyPiSource.get_releases(
             info['releases'], package.release_regex)
-
-        tags = PyPiSource.get_topics(
-                info['info']['project_urls']
-        )
 
         return {
             'description': info['info']['summary'] or '',
             'site_url': info[
                 'info']['home_page'] or info[
                 'info']['project_url'],
-            'tags': tags, 'releases': releases
+            'tags': tags, 'releases': releases,
+            'code_hosting_repository': code_hosting_repository
         }
 
     @staticmethod
     def request(package):
         resp = requests.get(
-            'https://pypi.org/pypi/%s/json' % package.source_id)
+            'https://pypi.org/pypi/%s/json' % package.name)
         return resp.json()
 
     @staticmethod
-    def get_repository(project_urls):
-        if project_urls is not None:
-            for url in project_urls.values():
-                matches = re.search(r'github\.com/([\w_-]+/[\w_-]+)', url)
-                if matches is not None:
-                    return matches.group(1)
+    def get_code_hosting_repository(project_urls):
+        for url in project_urls.values() if project_urls else []:
+            matches = re.search(r'github\.com/([\w_-]+/[\w_-]+)', url)
+            if matches is not None:
+                return matches.group(1)
         return None
 
     @staticmethod
-    def get_topics(project_urls):
-        repository = PyPiSource.get_repository(project_urls)
-        if repository is not None:
-            repository_owner, repository_name = repository.split('/')
-            gql_query = PyPiSource.gql_query % (
-                repository_owner, repository_name)
-            resp = GithubClient.execute(gql_query)
-            return [
-                node['topic']['name']
-                for node in resp['repository']['topics']['nodes']
-            ]
-        return []
+    def get_code_hosting_topics(code_hosting_repository):
+        code_hosting_repository = code_hosting_repository.split('/')
+        repository_owner, repository_name = code_hosting_repository
+        gql_query = PyPiSource.gql_query % (
+            repository_owner, repository_name)
+        resp = GithubClient.execute(gql_query)
+        return [
+            node['topic']['name']
+            for node in resp['repository']['topics']['nodes']
+        ]
 
     @staticmethod
     def get_releases(releases, release_regex):

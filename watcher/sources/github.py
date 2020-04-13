@@ -77,27 +77,26 @@ class GithubSource:
 
     @staticmethod
     def get_info(package):
-        info = GithubSource.request(*package.source_id.split('/'))
-
-        tags = [
-            topic['topic']['name']
-            for topic in info['topics']['nodes']
-        ]
-
-        releases = GithubSource.get_releases(
-            info['tags']['nodes'], package.release_regex)
-
-        return {
-            'description': info['description'] or '',
-            'site_url': info['homepageUrl'] or info['url'],
-            'tags': tags, 'releases': releases,
-        }
+        if package.code_hosting_repository:
+            info = GithubSource.request(
+                *package.code_hosting_repository.split('/'))
+            tags = [
+                topic['topic']['name'] for topic in info[
+                    'topics']['nodes']
+            ]
+            releases = GithubSource.get_releases(
+                info['tags']['nodes'], package.release_regex)
+            return {
+                'description': info['description'] or '',
+                'site_url': info['homepageUrl'] or info['url'],
+                'tags': tags, 'releases': releases,
+            }
+        return None
 
     @staticmethod
     def request(repository_owner, repository_name):
         gql_query = GithubSource.gql_query % (
-            repository_owner, repository_name
-        )
+            repository_owner, repository_name)
         resp = GithubClient.execute(gql_query)
         return resp['repository']
 
@@ -116,8 +115,6 @@ class GithubSource:
             if matches is not None:
                 name = matches.group(1)
                 prefix = matches.group(2)
-                if 0 in prefixes:
-                    break
                 if prefix in prefixes:
                     continue
                 prefixes.append(prefix)

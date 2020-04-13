@@ -6,8 +6,8 @@ from django.core.management.base import BaseCommand
 from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
 
-from watcher.models import Package, Release
 from watcher.sources import GithubSource, PyPiSource
+from watcher.models import Package, Release
 from watcher.services import send_manually_exception_email
 
 
@@ -26,13 +26,14 @@ class Command(BaseCommand):
 
     @staticmethod
     def processing(sources):
-        packages = Package.objects.all().order_by('source_type')
+        packages = Package.objects.all().order_by('source')
         for package in packages:
             try:
-                source = sources[package.source_type]
-                info = source.get_info(package)
+                source = sources[package.source]
 
-                tags = ','.join(info['tags'])
+                info = source.get_info(package)
+                if info is None:
+                    continue
 
                 description = re.sub(
                     r':\w+:', '', info['description']
@@ -44,8 +45,13 @@ class Command(BaseCommand):
                     description = description.split(' ')
                     description = ' '.join(description[:-1]) + '...'
 
+                if 'code_hosting_repository' in info:
+                    if info['code_hosting_repository']:
+                        package.code_hosting_repository = info[
+                            'code_hosting_repository']
+
                 package.description = description
-                package.tags = tags
+                package.tags = ','.join(info['tags'])
                 package.site_url = info['site_url']
 
                 package.save()
