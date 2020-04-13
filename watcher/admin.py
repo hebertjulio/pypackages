@@ -13,7 +13,7 @@ class PackageAdmin(admin.ModelAdmin):
         'name', 'source_id',
     )
     readonly_fields = (
-        'description', 'site_url', 'hashtags',
+        'description', 'site_url', 'tags',
         'created', 'modified',
     )
     list_filter = (

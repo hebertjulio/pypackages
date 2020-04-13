@@ -29,25 +29,20 @@ class PyPiSource:
     @staticmethod
     def get_info(package):
         info = PyPiSource.request(package)
+
         releases = PyPiSource.get_releases(
-            info['releases'], package.release_regex
+            info['releases'], package.release_regex)
+
+        tags = PyPiSource.get_topics(
+                info['info']['project_urls']
         )
-        repository = PyPiSource.get_repository(
-            info['info']['project_urls']
-        )
-        topics = [topic for topic in PyPiSource.get_topics(
-            repository
-        )]
-        hashtags = PyPiSource.get_hasttags(topics, [
-                package.programming_language,
-                package.name
-        ])
+
         return {
             'description': info['info']['summary'] or '',
             'site_url': info[
                 'info']['home_page'] or info[
                 'info']['project_url'],
-            'hashtags': hashtags, 'releases': releases
+            'tags': tags, 'releases': releases
         }
 
     @staticmethod
@@ -65,27 +60,18 @@ class PyPiSource:
         return None
 
     @staticmethod
-    def get_topics(repository):
+    def get_topics(project_urls):
+        repository = PyPiSource.get_repository(project_urls)
         if repository is not None:
             repository_owner, repository_name = repository.split('/')
             gql_query = PyPiSource.gql_query % (
                 repository_owner, repository_name)
             resp = GithubClient.execute(gql_query)
-            for node in resp['repository']['topics']['nodes']:
-                yield node['topic']['name']
-
-    @staticmethod
-    def get_hasttags(topics, extra_topics):
-        hashtags = set()
-        for topic in topics + extra_topics:
-            hashtag = '#' + topic
-            hashtag = hashtag.lower()
-            hashtag = hashtag.replace('-', '')
-            hashtag = hashtag.replace('_', '')
-            hashtag = hashtag.replace('@', '')
-            hashtag = hashtag.replace('/', '')
-            hashtags.add(hashtag)
-        return ' '.join(hashtags)
+            return [
+                node['topic']['name']
+                for node in resp['repository']['topics']['nodes']
+            ]
+        return []
 
     @staticmethod
     def get_releases(releases, release_regex):

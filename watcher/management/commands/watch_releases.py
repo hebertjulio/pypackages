@@ -32,6 +32,8 @@ class Command(BaseCommand):
                 source = sources[package.source_type]
                 info = source.get_info(package)
 
+                tags = ','.join(info['tags'])
+
                 description = re.sub(
                     r':\w+:', '', info['description']
                 ).encode('ascii', 'ignore').decode('ascii').strip()
@@ -43,7 +45,7 @@ class Command(BaseCommand):
                     description = ' '.join(description[:-1]) + '...'
 
                 package.description = description
-                package.hashtags = info['hashtags']
+                package.tags = tags
                 package.site_url = info['site_url']
 
                 package.save()
