@@ -68,13 +68,13 @@ class Command(BaseCommand):
             '_': None, ' ': None
         })
 
-        hashtags = ' '.join(set([
+        hashtags = ' '.join(list(dict.fromkeys([
             '#' + tag.translate(trans)
             for tag in
             release.package.tags.split(',') + [
                 release.package.programming_language,
                 release.package.name
-            ]])
+            ]]))
         )
 
         while True:

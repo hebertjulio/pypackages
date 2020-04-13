@@ -32,7 +32,7 @@ class Command(BaseCommand):
                 source = sources[package.source_type]
                 info = source.get_info(package)
 
-                tags = ', '.join(info['tags'])
+                tags = ','.join(info['tags'])
 
                 description = re.sub(
                     r':\w+:', '', info['description']
