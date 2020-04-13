@@ -19,7 +19,7 @@ python_path = subprocess.check_output(args, shell=False)  # nosec
 PYTHON_PATH = python_path.strip()
 
 
-@sched.scheduled_job('interval', hours=12)
+@sched.scheduled_job('interval', hours=6)
 def watch_releases():
     """ Watching for new relases in code hostings. """
     start_time = time.time()
@@ -30,7 +30,7 @@ def watch_releases():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=12)
+@sched.scheduled_job('interval', hours=6)
 def clean_recent_actions():
     """ Clear all recent actions. """
     start_time = time.time()
@@ -41,7 +41,7 @@ def clean_recent_actions():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=12)
+@sched.scheduled_job('interval', hours=6)
 def clearsessions():
     """ Clear all invalid sessions. """
     start_time = time.time()

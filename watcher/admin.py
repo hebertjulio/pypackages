@@ -28,7 +28,7 @@ class ReleaseAdmin(admin.ModelAdmin):
         'package', 'name', 'status',
     )
     search_fields = (
-        'name', 'package',
+        'name', 'package__name',
     )
     readonly_fields = (
         'created', 'modified',
