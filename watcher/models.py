@@ -28,11 +28,11 @@ class Package(TimeStampedModel):
     )
     code_hosting_repository = models.CharField(
         _('code hosting repository'), max_length=200,
-        blank=True, help_text=_('repository owner/name')
+        blank=True, help_text=_('Repository <b>Owner/Name</b>')
     )
     release_regex = models.CharField(
         _('release regex'), max_length=100,
-        help_text=_('^v?((\\d+)(?:\\.\\d+)+)$'),
+        help_text=_('Ex. <b>^((\d+)(?:\.\d+)+\w*)$</b>'),
     )
     tags = models.CharField(
         _('tags'), max_length=255, blank=True
