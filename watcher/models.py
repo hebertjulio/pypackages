@@ -32,7 +32,7 @@ class Package(TimeStampedModel):
     )
     release_regex = models.CharField(
         _('release regex'), max_length=100,
-        help_text=_('Ex. <b>^((\d+)(?:\.\d+)+\w*)$</b>'),
+        help_text=_('Ex. <b>^((\\d+)(?:\\.\\d+)+\\w*)$</b>'),
     )
     tags = models.CharField(
         _('tags'), max_length=255, blank=True
