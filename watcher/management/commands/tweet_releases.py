@@ -62,7 +62,21 @@ class Command(BaseCommand):
         description = release.package.description
         site_url = release.package.site_url
         version = release.name
-        hashtags = release.package.hashtags
+
+        trans = str.maketrans({
+            '@': None, '/': None, '-': None,
+            '_': None, ' ': None
+        })
+
+        hashtags = ' '.join(set([
+            '#' + tag.translate(trans)
+            for tag in
+            release.package.tags.split(',') + [
+                release.package.programming_language,
+                release.package.name
+            ]])
+        )
+
         while True:
             tweet_text = (
                 'The release of %s package %s is now'
@@ -74,8 +88,10 @@ class Command(BaseCommand):
             if len(tweet_text) < 280:
                 api.update_status(tweet_text.strip())
                 break
+
             description = description.split(' ')
             description = '%s...' % (
                 ' '.join(description[:-1]))
+
         release.status = Release.STATUS.tweeted
         release.save()

@@ -78,20 +78,19 @@ class GithubSource:
     @staticmethod
     def get_info(package):
         info = GithubSource.request(*package.source_id.split('/'))
-        hashtags = GithubSource.get_hasttags(
-            info['topics']['nodes'], [
-                package.programming_language,
-                package.name
-            ]
-        )
+
+        tags = [
+            topic['topic']['name']
+            for topic in info['topics']['nodes']
+        ]
+
         releases = GithubSource.get_releases(
-            info['tags']['nodes'],
-            package.release_regex
-        )
+            info['tags']['nodes'], package.release_regex)
+
         return {
             'description': info['description'] or '',
             'site_url': info['homepageUrl'] or info['url'],
-            'hashtags': hashtags, 'releases': releases,
+            'tags': tags, 'releases': releases,
         }
 
     @staticmethod
@@ -101,20 +100,6 @@ class GithubSource:
         )
         resp = GithubClient.execute(gql_query)
         return resp['repository']
-
-    @staticmethod
-    def get_hasttags(topics, extra_topics):
-        hashtags = set()
-        for topic in topics + extra_topics:
-            hashtag = '#' + topic[
-                'topic']['name'] if 'topic' in topic else topic
-            hashtag = hashtag.lower()
-            hashtag = hashtag.replace('-', '')
-            hashtag = hashtag.replace('_', '')
-            hashtag = hashtag.replace('@', '')
-            hashtag = hashtag.replace('/', '')
-            hashtags.add(hashtag)
-        return ' '.join(hashtags)
 
     @staticmethod
     def get_releases(releases, release_regex):

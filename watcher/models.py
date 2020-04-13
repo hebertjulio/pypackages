@@ -36,8 +36,8 @@ class Package(TimeStampedModel):
         _('release regex'), max_length=100,
         help_text=_('Ex. ^v?((\\d+)(?:\\.\\d+)+)$'),
     )
-    hashtags = models.CharField(
-        _('hashtags'), max_length=255, blank=True
+    tags = models.CharField(
+        _('tags'), max_length=255, blank=True
     )
     description = models.CharField(
         _('description'), max_length=255, blank=True
