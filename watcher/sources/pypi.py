@@ -94,5 +94,5 @@ class PyPiSource:
                         'name': name,
                         'created': created
                     }
-        for release in latest_releases:
-            yield latest_releases[release]
+        for release in latest_releases.values():
+            yield release
