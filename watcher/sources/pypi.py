@@ -76,8 +76,8 @@ class PyPiSource:
 
     @staticmethod
     def get_releases(releases, release_regex):
-        prefixes = []
-        for name in reversed(releases):
+        latest_releases = {}
+        for name in releases:
             if releases[name]:
                 info = releases[name][0]
                 created = parse_datetime(info['upload_time_iso_8601'])
@@ -86,13 +86,13 @@ class PyPiSource:
                     continue
                 matches = re.search(release_regex, name)
                 if matches is not None:
-                    if 0 in prefixes:
-                        break
                     prefix = matches.group(2)
-                    if prefix in prefixes:
-                        continue
-                    prefixes.append(prefix)
-                    yield {
+                    if prefix in latest_releases:
+                        if created < latest_releases[prefix]['created']:
+                            continue
+                    latest_releases[prefix] = {
                         'name': name,
                         'created': created
                     }
+        for release in latest_releases:
+            yield latest_releases[release]
