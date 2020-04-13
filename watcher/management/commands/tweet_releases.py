@@ -68,14 +68,14 @@ class Command(BaseCommand):
             '_': None, ' ': None
         })
 
-        hashtags = ' '.join(list(dict.fromkeys([
+        hashtags = sorted(list(dict.fromkeys([
             '#' + tag.translate(trans)
             for tag in
             release.package.tags.split(',') + [
                 release.package.programming_language,
                 release.package.name
-            ]]))
-        )
+            ]])
+        ), key=len)
 
         while True:
             tweet_text = (
@@ -83,11 +83,15 @@ class Command(BaseCommand):
                 ' available. 🥳\n\n%s%s\n\n%s') % (
                     package, version,
                     '%s\n' % description if description else '',
-                    site_url, hashtags
+                    site_url, ' '.join(hashtags)
                 )
             if len(tweet_text) < 280:
                 api.update_status(tweet_text.strip())
                 break
+
+            if len(hashtags) > 5:
+                hashtags = hashtags[:-1]
+                continue
 
             description = description.split(' ')
             description = '%s...' % (
