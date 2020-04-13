@@ -53,10 +53,11 @@ class PyPiSource:
 
     @staticmethod
     def get_repository(project_urls):
-        for url in project_urls.values():
-            matches = re.search(r'github\.com/([\w_-]+/[\w_-]+)', url)
-            if matches is not None:
-                return matches.group(1)
+        if project_urls is not None:
+            for url in project_urls.values():
+                matches = re.search(r'github\.com/([\w_-]+/[\w_-]+)', url)
+                if matches is not None:
+                    return matches.group(1)
         return None
 
     @staticmethod
