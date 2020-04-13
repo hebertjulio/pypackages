@@ -70,11 +70,10 @@ class Command(BaseCommand):
 
         hashtags = sorted(list(dict.fromkeys([
             '#' + tag.translate(trans)
-            for tag in
-            release.package.tags.split(',') + [
+            for tag in release.package.tags.split(',') + [
                 release.package.programming_language,
                 release.package.name
-            ]])
+            ] if tag.strip()])
         ), key=len)
 
         while True:
