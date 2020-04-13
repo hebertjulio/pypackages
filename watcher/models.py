@@ -12,7 +12,7 @@ class Package(TimeStampedModel):
         ('css', 'css'),
     )
 
-    SOURCE_TYPE = Choices(
+    SOURCE = Choices(
         ('github', 'github'),
         ('pypi', 'pypi'),
     )
@@ -23,18 +23,16 @@ class Package(TimeStampedModel):
     programming_language = models.CharField(
         _('programming language'), max_length=50, choices=PROGRAMMING_LANGUAGE
     )
-    source_type = models.CharField(
-        _('source type'), max_length=50, choices=SOURCE_TYPE
+    source = models.CharField(
+        _('source'), max_length=50, choices=SOURCE
     )
-    source_id = models.CharField(
-        _('source id'), max_length=200,
-        help_text=_((
-            'Repository owner/name of Github, or '
-            'package name if PyPi'))
+    code_hosting_repository = models.CharField(
+        _('code hosting repository'), max_length=200,
+        blank=True, help_text=_('repository owner/name')
     )
     release_regex = models.CharField(
         _('release regex'), max_length=100,
-        help_text=_('Ex. ^v?((\\d+)(?:\\.\\d+)+)$'),
+        help_text=_('^v?((\\d+)(?:\\.\\d+)+)$'),
     )
     tags = models.CharField(
         _('tags'), max_length=255, blank=True
@@ -57,7 +55,6 @@ class Package(TimeStampedModel):
         verbose_name_plural = _('packages')
         unique_together = [
             ['name', 'programming_language'],
-            ['source_type', 'source_id'],
         ]
         ordering = [
             'name',
