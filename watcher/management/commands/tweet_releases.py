@@ -75,7 +75,7 @@ class Command(BaseCommand):
                 release.package.programming_language,
                 release.package.name
             ]])
-        ), key=lambda t: len(t))
+        ), key=len)
 
         while True:
             tweet_text = (
