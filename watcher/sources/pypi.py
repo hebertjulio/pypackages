@@ -22,7 +22,7 @@ class PyPiSource:
         }
     }'''
 
-    RELEASE_MIN_AGE = 15
+    RELEASE_MIN_AGE = 5
 
     now = timezone.now()
 
