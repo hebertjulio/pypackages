@@ -9,8 +9,8 @@ sched = BlockingScheduler()
 
 args = ['python']
 try:
-    pyenv_path = subprocess.check_output([
-        '/usr/bin/which', 'pyenv'], shell=False)  # nosec
+    pyenv_path = str(subprocess.check_output([
+        '/usr/bin/which', 'pyenv'], shell=False))  # nosec
     args = [*[pyenv_path.strip(), 'which'], *args]
 except subprocess.CalledProcessError:
     args = [*['/usr/bin/which'], *args]
