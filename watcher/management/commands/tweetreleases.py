@@ -84,8 +84,7 @@ class Command(BaseCommand):
                     homepage, hashtags)
 
             if len(tweet_text) < 280:
-                print(tweet_text)
-                # api.update_status(tweet_text.strip())
+                api.update_status(tweet_text.strip())
                 break
 
             if len(hashtags) > 5:
