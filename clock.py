@@ -19,31 +19,42 @@ python_path = subprocess.check_output(args, shell=False)  # nosec
 PYTHON_PATH = python_path.strip()
 
 
-@sched.scheduled_job('interval', hours=6)
-def watch_releases():
-    """ Watching for new relases in code hostings. """
+@sched.scheduled_job('interval', minutes=60)
+def get_pypi_updates():
+    """Read http://pypi.org/rss/updates.xml to catch new releases"""
     start_time = time.time()
     subprocess.run([
-        PYTHON_PATH, 'manage.py', 'watch_releases'],
+        PYTHON_PATH, 'manage.py', 'getpypiupdates'],
         shell=False)  # nosec
     print('watch_releases finished in %s seconds' % (
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=6)
-def clean_recent_actions():
-    """ Clear all recent actions. """
+@sched.scheduled_job('interval', minutes=75)
+def get_packages_info():
+    """Get info in Libraries.io to update new and outdated packages"""
     start_time = time.time()
     subprocess.run([
-        PYTHON_PATH, 'manage.py', 'clean_recent_actions'],
+        PYTHON_PATH, 'manage.py', 'getpackagesinfo'],
+        shell=False)  # nosec
+    print('watch_releases finished in %s seconds' % (
+        time.time() - start_time))
+
+
+@sched.scheduled_job('interval', hours=24)
+def clear_recent_actions():
+    """Clear recent actions history"""
+    start_time = time.time()
+    subprocess.run([
+        PYTHON_PATH, 'manage.py', 'clearrecentactions'],
         shell=False)  # nosec
     print('clean_recent_actions finished in %s seconds' % (
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=6)
-def clearsessions():
-    """ Clear all invalid sessions. """
+@sched.scheduled_job('interval', hours=24)
+def clear_sessions():
+    """Clear all invalid sessions"""
     start_time = time.time()
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'clearsessions'],
@@ -52,12 +63,12 @@ def clearsessions():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', minutes=30)
+@sched.scheduled_job('interval', minutes=15)
 def tweet_releases():
-    """ Tweet one new release by programming language. """
+    """Tweet new releases of packages by twitter accounts"""
     start_time = time.time()
     subprocess.run([
-        PYTHON_PATH, 'manage.py', 'tweet_releases'],
+        PYTHON_PATH, 'manage.py', 'tweetreleases'],
         shell=False)  # nosec
     print('tweet_releases finished in %s seconds' % (
         time.time() - start_time))

@@ -8,41 +8,29 @@ from model_utils import Choices
 class Package(TimeStampedModel):
     PROGRAMMING_LANGUAGE = Choices(
         ('python', 'python'),
-        ('javascript', 'javascript'),
-        ('css', 'css'),
     )
 
-    SOURCE = Choices(
-        ('github', 'github'),
-        ('pypi', 'pypi'),
+    STATUS = Choices(
+        ('new', _('new')),
+        ('done', _('done')),
+        ('fail', _('fail')),
     )
 
-    name = models.CharField(
-        _('name'), max_length=100
-    )
+    name = models.CharField(_('name'), max_length=100)
     programming_language = models.CharField(
-        _('programming language'), max_length=50, choices=PROGRAMMING_LANGUAGE
+        _('programming language'), max_length=50,
+        choices=PROGRAMMING_LANGUAGE
     )
-    source = models.CharField(
-        _('source'), max_length=50, choices=SOURCE
+    rank = models.PositiveIntegerField(_('rank'), default=0)
+    repository = models.CharField(_('repository'), max_length=200, blank=True)
+    keywords = models.CharField(_('keywords'), max_length=255)
+    description = models.CharField(_('description'), max_length=255)
+    homepage = models.CharField(_('homepage'), max_length=255)
+    status = models.CharField(
+        _('status'), max_length=50, db_index=True,
+        default=STATUS.new, choices=STATUS
     )
-    code_hosting_repository = models.CharField(
-        _('code hosting repository'), max_length=200,
-        blank=True, help_text=_('Repository <b>Owner/Name</b>')
-    )
-    release_regex = models.CharField(
-        _('release regex'), max_length=100,
-        help_text=_('Ex. <b>^((\\d+)(?:\\.\\d+)+\\w*)$</b>'),
-    )
-    tags = models.CharField(
-        _('tags'), max_length=255, blank=True
-    )
-    description = models.CharField(
-        _('description'), max_length=255, blank=True
-    )
-    site_url = models.CharField(
-        _('site url'), max_length=255, blank=True
-    )
+    message = models.TextField(_('message'), blank=True)
 
     def __str__(self):
         return self.name
@@ -56,9 +44,7 @@ class Package(TimeStampedModel):
         unique_together = [
             ['name', 'programming_language'],
         ]
-        ordering = [
-            'name',
-        ]
+        ordering = ['name']
 
 
 class Release(TimeStampedModel):
@@ -67,15 +53,11 @@ class Release(TimeStampedModel):
         ('tweeted', _('tweeted')),
     )
 
-    name = models.CharField(
-        _('name'), max_length=50
-    )
+    name = models.CharField(_('name'), max_length=50)
+    package = models.ForeignKey('Package', on_delete=models.CASCADE)
     status = models.CharField(
         _('status'), max_length=50, db_index=True,
-        choices=STATUS, default=STATUS.new
-    )
-    package = models.ForeignKey(
-        'Package', on_delete=models.CASCADE
+        default=STATUS.new, choices=STATUS
     )
 
     def __str__(self):
@@ -90,6 +72,4 @@ class Release(TimeStampedModel):
         unique_together = [
             ['name', 'package'],
         ]
-        ordering = [
-            '-created',
-        ]
+        ordering = ['status', '-created']
