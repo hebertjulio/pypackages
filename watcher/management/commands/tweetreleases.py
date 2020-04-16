@@ -40,8 +40,10 @@ class Command(BaseCommand):
                 Command.write_tweets(release, account['api'])
 
         # put done all releases of packages with rank less than 10
-        Release.objects.filter(package__rank__lt=MIN_RANK).update(
-            status=Release.STATUS.done)
+        Release.objects.filter(
+            package__rank__lt=MIN_RANK,
+            package__status=Package.STATUS.done).update(
+                status=Release.STATUS.done)
 
     @staticmethod
     def get_accounts():
