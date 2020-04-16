@@ -26,7 +26,7 @@ def get_pypi_updates():
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'getpypiupdates'],
         shell=False)  # nosec
-    print('watch_releases finished in %s seconds' % (
+    print('getpypiupdates finished in %s seconds' % (
         time.time() - start_time))
 
 
@@ -37,7 +37,7 @@ def get_packages_info():
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'getpackagesinfo'],
         shell=False)  # nosec
-    print('watch_releases finished in %s seconds' % (
+    print('getpackagesinfo finished in %s seconds' % (
         time.time() - start_time))
 
 
@@ -48,7 +48,7 @@ def clear_recent_actions():
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'clearrecentactions'],
         shell=False)  # nosec
-    print('clean_recent_actions finished in %s seconds' % (
+    print('clearrecentactions finished in %s seconds' % (
         time.time() - start_time))
 
 
@@ -70,7 +70,7 @@ def tweet_releases():
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'tweetreleases'],
         shell=False)  # nosec
-    print('tweet_releases finished in %s seconds' % (
+    print('tweetreleases finished in %s seconds' % (
         time.time() - start_time))
 
 
