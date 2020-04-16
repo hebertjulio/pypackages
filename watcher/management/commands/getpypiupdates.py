@@ -50,10 +50,10 @@ class Command(BaseCommand):
             release = matches.group(2)
 
             # skip no stable releases
-            regex = r'\D(?:rc\d+|[a-z]+\d*)$'
-            match = re.match(regex, release)
-            if match is not None:
-                continue
+            # regex = r'\D(?:rc\d+|[a-z]+\d*)$'
+            # match = re.match(regex, release)
+            # if match is not None:
+            #     continue
 
             # get package link
             regex = r'^(.+)(?:%s/)$' % release
