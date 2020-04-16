@@ -1,6 +1,5 @@
 import sys
 import time
-import re
 
 from django.core.management.base import BaseCommand
 
@@ -46,29 +45,28 @@ class Command(BaseCommand):
                     error = e
                 break
 
-            if error is None:
-                package.keywords = ','.join(list(dict.fromkeys([
-                    keyword.translate(Command.trans).lower()
-                    for keyword in [
-                        Package.PROGRAMMING_LANGUAGE.python,
-                        package.name,
-                    ] + info['keywords']])
-                ))
-
-                if info['description']:
-                    package.decription = info['description']
-
-                if info['homepage']:
-                    regex = r'(?:http[s]?://)?github.com'
-                    match = re.match(regex, info['homepage'])
-                    if not match:
-                        package.homepage = info['homepage']
-
-                package.rank = info['rank']
-                package.repository = info['repository']
-                package.status = Package.STATUS.done
-            else:
+            if error is not None:
                 package.message = error
                 package.status = Package.STATUS.fail
+                package.save()
+                continue
 
+            package.keywords = ','.join(list(dict.fromkeys([
+                keyword.translate(Command.trans).lower()
+                for keyword in [
+                    Package.PROGRAMMING_LANGUAGE.python,
+                    package.name,
+                ] + info['keywords']])
+            ))
+
+            if info['description']:
+                package.decription = info['description']
+
+            if info['homepage']:
+                package.homepage = info['homepage']
+
+            package.rank = info['rank']
+            package.repository = info['repository']
+
+            package.status = Package.STATUS.done
             package.save()
