@@ -33,9 +33,10 @@ class Command(BaseCommand):
                     description=item['description'],
                     keywords=item['keywords'],
                     homepage=item['homepage'])
-            Release.objects.get_or_create(
-                name=item['release'], package=package,
-            )
+            if package.status != Package.STATUS.fail:
+                Release.objects.get_or_create(
+                    name=item['release'], package=package,
+                )
 
     @staticmethod
     def get_updates():
