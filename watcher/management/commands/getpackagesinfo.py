@@ -7,6 +7,7 @@ from requests.exceptions import HTTPError
 
 from watcher.apis import LibrariesIO
 from watcher.models import Package
+from watcher.resume import text_resume
 
 
 MAX_RETRY = 2
@@ -30,6 +31,7 @@ class Command(BaseCommand):
         packages = Package.objects.filter(
             status=Package.STATUS.new).order_by('modified')
         for package in packages:
+            package.message = ''
             retry = 0
             platform = 'pypi'
             while True:
@@ -43,6 +45,8 @@ class Command(BaseCommand):
                             time.sleep(65)
                             continue
                     error = e
+                except Exception as e:
+                    error = e
                 break
 
             if error is not None:
@@ -51,22 +55,27 @@ class Command(BaseCommand):
                 package.save()
                 continue
 
-            package.keywords = ','.join(list(dict.fromkeys([
-                keyword.translate(Command.trans).lower()
-                for keyword in [
-                    Package.PROGRAMMING_LANGUAGE.python,
-                    package.name,
-                ] + info['keywords']])
-            ))
+            try:
+                package.keywords = ','.join(list(dict.fromkeys([
+                    keyword.translate(Command.trans).lower()
+                    for keyword in [
+                        Package.PROGRAMMING_LANGUAGE.python,
+                        package.name,
+                    ] + info['keywords']])
+                ))
 
-            if info['description']:
-                package.decription = info['description']
+                if info['description']:
+                    description = info['description']
+                    description = text_resume(description, 255)
 
-            if info['homepage']:
-                package.homepage = info['homepage']
+                if info['homepage']:
+                    package.homepage = info['homepage']
 
-            package.rank = info['rank']
-            package.repository = info['repository']
-
-            package.status = Package.STATUS.done
-            package.save()
+                package.repository = info['repository']
+                package.rank = info['rank']
+                package.status = Package.STATUS.done
+            except Exception as e:
+                package.message = e
+                package.status = Package.STATUS.fail
+            finally:
+                package.save()
