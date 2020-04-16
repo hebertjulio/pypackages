@@ -7,6 +7,13 @@ from requests import get as rget
 from .resume import text_resume
 
 
+class LibrariesIOError(Exception):
+
+    def __init__(self, package, error):
+        message = '[libraries.io] package: %s, error: %s' % (package, error)
+        super().__init__(message)
+
+
 class LibrariesIO:
 
     access_token = settings.LIBRARIESIO_ACCESS_TOKEN
@@ -23,8 +30,7 @@ class LibrariesIO:
         info = resp.json()
 
         if 'error' in info and info['error']:
-            raise Exception('[libriries.io] package: %s, error: %s' % (
-                package, info['error']))
+            raise LibrariesIOError(package, info['error'])
 
         description = ''
         if 'description' in info:
@@ -53,8 +59,6 @@ class LibrariesIO:
         if not homepage:
             if 'package_manager_url' in info:
                 homepage = info['package_manager_url'] or ''
-
-        print(package, homepage)
 
         rank = 0
         if 'rank' in info:
