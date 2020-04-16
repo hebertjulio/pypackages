@@ -26,7 +26,7 @@ def get_pypi_updates():
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'getpypiupdates'],
         shell=False)  # nosec
-    print('watch_releases finished in %s seconds' % (
+    print('getpypiupdates finished in %s seconds' % (
         time.time() - start_time))
 
 
