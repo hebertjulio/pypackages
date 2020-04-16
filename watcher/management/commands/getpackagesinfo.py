@@ -17,7 +17,7 @@ class Command(BaseCommand):
     help = 'Get info in Libraries.io to update new and outdated packages'
 
     trans = str.maketrans({
-        '-': None, '_': None, ' ': None
+        '-': None, '_': None, ' ': None, '.': None
     })
 
     def handle(self, *args, **options):
