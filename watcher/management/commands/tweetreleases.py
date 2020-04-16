@@ -9,7 +9,7 @@ from watcher.models import Package, Release
 from watcher.resume import text_resume
 
 
-MIN_RANK = 4
+MIN_RANK = 13  # lulalivre :p
 MAX_TWEET_SIZE = 280
 
 
