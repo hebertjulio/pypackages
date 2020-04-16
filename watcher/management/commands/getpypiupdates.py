@@ -60,7 +60,7 @@ class Command(BaseCommand):
             homepage = matches.group(1)
 
             description = item['description'] or ''
-            description = text_resume(description, 255)
+            description = text_resume(description, 255, ' ')
 
             yield {
                 'name': name, 'release': release, 'keywords': '',

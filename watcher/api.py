@@ -35,7 +35,7 @@ class LibrariesIO:
         description = ''
         if 'description' in info:
             description = info['description'] or ''
-            description = text_resume(description, 255)
+            description = text_resume(description, 255, ' ')
 
         repository = ''
         if 'repository_url' in info:

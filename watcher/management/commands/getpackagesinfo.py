@@ -10,7 +10,7 @@ from watcher.models import Package
 from watcher.resume import text_resume
 
 
-MAX_RETRY = 2
+MAX_RETRY = 5
 
 
 class Command(BaseCommand):
@@ -44,6 +44,9 @@ class Command(BaseCommand):
                         if e.response.status_code == 429:
                             time.sleep(65)
                             continue
+                        if e.response.status_code == 404:
+                            time.sleep(10)
+                            continue
                     error = e
                 except LibrariesIOError as e:
                     error = e
@@ -55,7 +58,7 @@ class Command(BaseCommand):
                 package.save()
                 continue
 
-            package.keywords = ','.join(list(dict.fromkeys([
+            keywords = ','.join(list(dict.fromkeys([
                 keyword.translate(Command.trans).lower()
                 for keyword in [
                     Package.PROGRAMMING_LANGUAGE.python,
@@ -63,9 +66,11 @@ class Command(BaseCommand):
                 ] + info['keywords']])
             ))
 
+            package.keywords = text_resume(keywords, 255, ',')
+
             if info['description']:
                 description = info['description']
-                description = text_resume(description, 255)
+                description = text_resume(description, 255, ' ')
 
             if info['homepage']:
                 package.homepage = info['homepage']
