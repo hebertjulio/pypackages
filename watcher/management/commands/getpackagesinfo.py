@@ -1,5 +1,6 @@
 import sys
 import time
+import re
 
 from django.core.management.base import BaseCommand
 
@@ -14,6 +15,10 @@ MAX_RETRY = 2
 
 class Command(BaseCommand):
     help = 'Get info in Libraries.io to update new and outdated packages'
+
+    trans = str.maketrans({
+        '-': None, '_': None, ' ': None
+    })
 
     def handle(self, *args, **options):
         try:
@@ -42,25 +47,28 @@ class Command(BaseCommand):
                 break
 
             if error is None:
-                trans = str.maketrans({
-                    '-': None, '_': None, ' ': None
-                })
                 package.keywords = ','.join(list(dict.fromkeys([
-                    keyword.translate(trans).lower()
+                    keyword.translate(Command.trans).lower()
                     for keyword in [
                         Package.PROGRAMMING_LANGUAGE.python,
                         package.name,
                     ] + info['keywords']])
                 ))
+
                 if info['description']:
                     package.decription = info['description']
+
                 if info['homepage']:
-                    package.homepage = info['homepage']
+                    regex = r'(?:http[s]?://)?github.com'
+                    match = re.match(regex, info['homepage'])
+                    if not match:
+                        package.homepage = info['homepage']
+
                 package.rank = info['rank']
                 package.repository = info['repository']
                 package.status = Package.STATUS.done
             else:
-                package.status = Package.STATUS.fail
                 package.message = error
+                package.status = Package.STATUS.fail
 
             package.save()

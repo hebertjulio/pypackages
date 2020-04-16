@@ -8,6 +8,9 @@ import tweepy
 from watcher.models import Package, Release
 
 
+MIN_RANK = 1
+
+
 class Command(BaseCommand):
     help = 'Tweet new releases of packages by twitter accounts'
 
@@ -17,7 +20,7 @@ class Command(BaseCommand):
 
     chars = '@/_-#$%*!()&=+[]:;? '
     trans = str.maketrans(
-        dict(zip(list(chars), ['' for v in range(len(chars))])))
+        dict(zip(list(chars), [None for v in range(len(chars))])))
 
     def handle(self, *args, **options):
         try:
@@ -29,12 +32,16 @@ class Command(BaseCommand):
     def processing():
         for account in Command.get_accounts():
             releases = Release.objects.filter(
-                status=Release.STATUS.new,
+                status=Release.STATUS.new, package__rank__gte=MIN_RANK,
                 package__programming_language=account['programming_language'],
-                package__status=Package.STATUS.done,
+                package__status=Package.STATUS.done
             ).order_by('created')[0:1]
             for release in releases:
                 Command.write_tweets(release, account['api'])
+
+        # put done all releases of packages with rank less than 10
+        Release.objects.filter(package__rank__lt=MIN_RANK).update(
+            status=Release.STATUS.done)
 
     @staticmethod
     def get_accounts():
@@ -77,7 +84,8 @@ class Command(BaseCommand):
                     homepage, hashtags)
 
             if len(tweet_text) < 280:
-                api.update_status(tweet_text.strip())
+                print(tweet_text)
+                # api.update_status(tweet_text.strip())
                 break
 
             if len(hashtags) > 5:
@@ -88,5 +96,5 @@ class Command(BaseCommand):
             description = '%s...' % (
                 ' '.join(description[:-1]))
 
-        release.status = Release.STATUS.tweeted
+        release.status = Release.STATUS.done
         release.save()

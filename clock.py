@@ -19,7 +19,7 @@ python_path = subprocess.check_output(args, shell=False)  # nosec
 PYTHON_PATH = python_path.strip()
 
 
-@sched.scheduled_job('interval', minutes=60)
+@sched.scheduled_job('interval', minutes=30)
 def get_pypi_updates():
     """Read http://pypi.org/rss/updates.xml to catch new releases"""
     start_time = time.time()
@@ -30,7 +30,7 @@ def get_pypi_updates():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', minutes=75)
+@sched.scheduled_job('interval', minutes=45)
 def get_packages_info():
     """Get info in Libraries.io to update new and outdated packages"""
     start_time = time.time()

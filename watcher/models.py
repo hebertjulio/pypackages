@@ -21,7 +21,7 @@ class Package(TimeStampedModel):
         _('programming language'), max_length=50,
         choices=PROGRAMMING_LANGUAGE
     )
-    rank = models.PositiveIntegerField(_('rank'), default=0)
+    rank = models.PositiveIntegerField(_('rank'), db_index=True, default=0)
     repository = models.CharField(_('repository'), max_length=200, blank=True)
     keywords = models.CharField(_('keywords'), max_length=255)
     description = models.CharField(_('description'), max_length=255)
@@ -50,7 +50,7 @@ class Package(TimeStampedModel):
 class Release(TimeStampedModel):
     STATUS = Choices(
         ('new', _('new')),
-        ('tweeted', _('tweeted')),
+        ('done', _('done')),
     )
 
     name = models.CharField(_('name'), max_length=50)
