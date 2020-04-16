@@ -9,7 +9,7 @@ from watcher.models import Package, Release
 from watcher.resume import text_resume
 
 
-MIN_RANK = 1
+MIN_RANK = 4
 
 
 class Command(BaseCommand):
