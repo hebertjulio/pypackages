@@ -39,8 +39,7 @@ class Command(BaseCommand):
                             time.sleep(65)
                             continue
                     error = e
-                finally:
-                    break
+                break
 
             if error is None:
                 trans = str.maketrans({

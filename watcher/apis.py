@@ -4,6 +4,8 @@ from requests import get as rget
 
 
 class LibrariesIO:
+
+    @staticmethod
     def get_info(platform, package):
         access_token = settings.LIBRARIESIO_ACCESS_TOKEN
         resp = rget(
