@@ -95,7 +95,9 @@ class Command(BaseCommand):
                 hashtags = hashtags[:-1]
             else:
                 maxlen = len(tweet_text) - MAX_TWEET_SIZE
-                description = text_resume(description, maxlen, oneslice=False)
+                description = text_resume(
+                    description, maxlen, ' ',
+                    oneslice=False) + '...'
 
         release.status = Release.STATUS.done
         release.save()
