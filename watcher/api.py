@@ -4,21 +4,38 @@ from django.conf import settings
 
 from requests import get as rget
 
+from .resume import text_resume
+
+
+class LibrariesIOError(Exception):
+
+    def __init__(self, package, error):
+        message = '[libraries.io] package: %s, error: %s' % (package, error)
+        super().__init__(message)
+
 
 class LibrariesIO:
 
+    access_token = settings.LIBRARIESIO_ACCESS_TOKEN
+
     @staticmethod
     def get_info(platform, package):
-        access_token = settings.LIBRARIESIO_ACCESS_TOKEN
         resp = rget(
             'https://libraries.io/api/%s/%s?api_key=%s' % (
-                platform, package, access_token))
+                platform, package, LibrariesIO.access_token))
+
+        if 200 <= resp.status_code >= 299:
+            raise resp.raise_for_status()
 
         info = resp.json()
+
+        if 'error' in info and info['error']:
+            raise LibrariesIOError(package, info['error'])
 
         description = ''
         if 'description' in info:
             description = info['description'] or ''
+            description = text_resume(description, 255)
 
         repository = ''
         if 'repository_url' in info:
@@ -33,12 +50,15 @@ class LibrariesIO:
             if info['homepage']:
                 homepage = info['homepage'] or ''
 
-        if 'package_manager_url' in info:
+        if 'repository_url' in info:
             regex = r'(?:http[s]?://)?(github|gitlab|bitbucket)'
             match = re.match(regex, homepage)
             if match:
-                print(homepage)
-                homepage = info['package_manager_url']
+                homepage = info['repository_url'] or ''
+
+        if not homepage:
+            if 'package_manager_url' in info:
+                homepage = info['package_manager_url'] or ''
 
         rank = 0
         if 'rank' in info:

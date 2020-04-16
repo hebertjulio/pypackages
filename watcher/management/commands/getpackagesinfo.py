@@ -5,8 +5,9 @@ from django.core.management.base import BaseCommand
 
 from requests.exceptions import HTTPError
 
-from watcher.apis import LibrariesIO
+from watcher.api import LibrariesIO, LibrariesIOError
 from watcher.models import Package
+from watcher.resume import text_resume
 
 
 MAX_RETRY = 2
@@ -30,6 +31,7 @@ class Command(BaseCommand):
         packages = Package.objects.filter(
             status=Package.STATUS.new).order_by('modified')
         for package in packages:
+            package.message = ''
             retry = 0
             platform = 'pypi'
             while True:
@@ -42,6 +44,8 @@ class Command(BaseCommand):
                         if e.response.status_code == 429:
                             time.sleep(65)
                             continue
+                    error = e
+                except LibrariesIOError as e:
                     error = e
                 break
 
@@ -60,13 +64,13 @@ class Command(BaseCommand):
             ))
 
             if info['description']:
-                package.decription = info['description']
+                description = info['description']
+                description = text_resume(description, 255)
 
             if info['homepage']:
                 package.homepage = info['homepage']
 
-            package.rank = info['rank']
             package.repository = info['repository']
-
+            package.rank = info['rank']
             package.status = Package.STATUS.done
             package.save()

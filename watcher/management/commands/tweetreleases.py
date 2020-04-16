@@ -6,6 +6,7 @@ from django.conf import settings
 import tweepy
 
 from watcher.models import Package, Release
+from watcher.resume import text_resume
 
 
 MIN_RANK = 1
@@ -71,11 +72,11 @@ class Command(BaseCommand):
         description = release.package.description.strip()
         homepage = release.package.homepage
 
-        hashtags = ' '.join(sorted(
+        hashtags = sorted(
             ['#' + keyword
                 for keyword in release.package.keywords.split(',')
                 if keyword.strip()],
-            key=len))
+            key=len)
 
         while True:
             tweet_text = (
@@ -83,19 +84,14 @@ class Command(BaseCommand):
                 '\n\n%s%s\n\n%s') % (
                     package, release.name,
                     '%s\n' % description if description else '',
-                    homepage, hashtags)
-
+                    homepage, ' '.join(hashtags))
             if len(tweet_text) < 280:
-                api.update_status(tweet_text.strip())
+                api.update_status(tweet_text)
                 break
-
             if len(hashtags) > 5:
                 hashtags = hashtags[:-1]
-                continue
-
-            description = description.split(' ')
-            description = '%s...' % (
-                ' '.join(description[:-1]))
+            description = text_resume(
+                description, len(tweet_text) - 280, oneslice=False)
 
         release.status = Release.STATUS.done
         release.save()
