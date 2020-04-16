@@ -7,6 +7,7 @@ from requests import get as rget
 from xmltodict import parse as xmlparse
 
 from watcher.models import Package, Release
+from watcher.resume import text_resume
 
 
 class Command(BaseCommand):
@@ -51,8 +52,11 @@ class Command(BaseCommand):
             matches = re.search(regex, item['link'])
             homepage = matches.group(1)
 
+            description = item['description'] or ''
+            description = text_resume(description, 255)
+
             yield {
                 'name': name, 'release': release, 'keywords': '',
-                'homepage': homepage, 'description': item['description'] or '',
+                'homepage': homepage, 'description': description,
                 'programming_language': Package.PROGRAMMING_LANGUAGE.python,
             }
