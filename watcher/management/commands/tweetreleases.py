@@ -10,6 +10,7 @@ from watcher.resume import text_resume
 
 
 MIN_RANK = 4
+MAX_TWEET_SIZE = 280
 
 
 class Command(BaseCommand):
@@ -85,13 +86,16 @@ class Command(BaseCommand):
                     package, release.name,
                     '%s\n' % description if description else '',
                     homepage, ' '.join(hashtags))
-            if len(tweet_text) < 280:
+
+            if len(tweet_text) < MAX_TWEET_SIZE:
                 api.update_status(tweet_text)
                 break
+
             if len(hashtags) > 5:
                 hashtags = hashtags[:-1]
-            description = text_resume(
-                description, len(tweet_text) - 280, oneslice=False)
+            else:
+                maxlen = len(tweet_text) - MAX_TWEET_SIZE
+                description = text_resume(description, maxlen, oneslice=False)
 
         release.status = Release.STATUS.done
         release.save()
