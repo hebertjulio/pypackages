@@ -33,7 +33,6 @@ class Command(BaseCommand):
                     description=item['description'],
                     keywords=item['keywords'],
                     homepage=item['homepage'])
-
             Release.objects.get_or_create(
                 name=item['release'], package=package,
             )
@@ -43,11 +42,19 @@ class Command(BaseCommand):
         resp = rget('https://pypi.org/rss/updates.xml')
         json = xmlparse(resp.text)
         for item in json['rss']['channel']['item']:
+            # get package name and release
             regex = r'^(.+)\s(.+)$'
             matches = re.search(regex, item['title'])
             name = matches.group(1)
             release = matches.group(2)
 
+            # skip no stable releases
+            regex = r'\D(?:rc\d+|[a-z]+\d*)$'
+            match = re.match(regex, release)
+            if match is not None:
+                continue
+
+            # get package link
             regex = r'^(.+)(?:%s/)$' % release
             matches = re.search(regex, item['link'])
             homepage = matches.group(1)
