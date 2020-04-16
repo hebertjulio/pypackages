@@ -5,11 +5,14 @@ from django.conf import settings
 
 import tweepy
 
-from watcher.models import Release
+from watcher.models import Package, Release
+
+
+MIN_RANK = 1
 
 
 class Command(BaseCommand):
-    help = 'Tweet new releases.'
+    help = 'Tweet new releases of packages by twitter accounts'
 
     text_template = (
         'The release of %s package %s is now available. 🥳\n\n%s'
@@ -17,24 +20,28 @@ class Command(BaseCommand):
 
     chars = '@/_-#$%*!()&=+[]:;? '
     trans = str.maketrans(
-        dict(zip(list(chars), ['' for v in range(len(chars))])))
+        dict(zip(list(chars), [None for v in range(len(chars))])))
 
     def handle(self, *args, **options):
         try:
-            accounts = Command.get_accounts()
-            Command.processing(accounts)
+            Command.processing()
         except KeyboardInterrupt:
             sys.exit(0)
 
     @staticmethod
-    def processing(accounts):
-        for account in accounts:
+    def processing():
+        for account in Command.get_accounts():
             releases = Release.objects.filter(
+                status=Release.STATUS.new, package__rank__gte=MIN_RANK,
                 package__programming_language=account['programming_language'],
-                status=Release.STATUS.new
+                package__status=Package.STATUS.done
             ).order_by('created')[0:1]
-            if releases:
-                Command.write_tweets(releases[0], account['api'])
+            for release in releases:
+                Command.write_tweets(release, account['api'])
+
+        # put done all releases of packages with rank less than 10
+        Release.objects.filter(package__rank__lt=MIN_RANK).update(
+            status=Release.STATUS.done)
 
     @staticmethod
     def get_accounts():
@@ -59,33 +66,26 @@ class Command(BaseCommand):
     @staticmethod
     def write_tweets(release, api):
         package = release.package.name
-        description = release.package.description
-        site_url = release.package.site_url
-        version = release.name
+        description = release.package.description.strip()
+        homepage = release.package.homepage
 
-        trans = str.maketrans({
-            '@': None, '/': None, '-': None,
-            '_': None, ' ': None
-        })
-
-        hashtags = sorted(list(dict.fromkeys([
-            '#' + tag.translate(trans)
-            for tag in release.package.tags.split(',') + [
-                release.package.programming_language,
-                release.package.name
-            ] if tag.strip()])
-        ), key=len)
+        hashtags = ' '.join(sorted(
+            ['#' + keyword
+                for keyword in release.package.keywords.split(',')
+                if keyword.strip()],
+            key=len))
 
         while True:
             tweet_text = (
-                'The release of %s package %s is now'
-                ' available. 🥳\n\n%s%s\n\n%s') % (
-                    package, version,
+                'The release of %s package %s is now available. 🥳'
+                '\n\n%s%s\n\n%s') % (
+                    package, release.name,
                     '%s\n' % description if description else '',
-                    site_url, ' '.join(hashtags)
-                )
+                    homepage, hashtags)
+
             if len(tweet_text) < 280:
-                api.update_status(tweet_text.strip())
+                print(tweet_text)
+                # api.update_status(tweet_text.strip())
                 break
 
             if len(hashtags) > 5:
@@ -96,5 +96,5 @@ class Command(BaseCommand):
             description = '%s...' % (
                 ' '.join(description[:-1]))
 
-        release.status = Release.STATUS.tweeted
+        release.status = Release.STATUS.done
         release.save()
