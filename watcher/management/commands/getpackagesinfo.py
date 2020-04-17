@@ -44,9 +44,9 @@ class Command(BaseCommand):
                         if e.response.status_code == 429:
                             time.sleep(65)
                             continue
-                        if e.response.status_code == 404:
-                            time.sleep(10)
-                            continue
+                        # if e.response.status_code == 404:
+                        #     time.sleep(10)
+                        #     continue
                     error = e
                 except LibrariesIOError as e:
                     error = e
