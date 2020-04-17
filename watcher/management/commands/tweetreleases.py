@@ -88,9 +88,8 @@ class Command(BaseCommand):
             if len(hashtags) > 5:
                 hashtags = hashtags[:-1]
             else:
-                maxlen = len(tweet_text) - MAX_TWEET_SIZE
                 description = text_resume(
-                    description, maxlen, ' ',
+                    description, MAX_TWEET_SIZE, ' ',
                     oneslice=False) + '...'
 
         release.status = Release.STATUS.done
