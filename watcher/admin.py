@@ -18,6 +18,7 @@ class PackageAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'programming_language', 'status',
+        'rank', 'created',
     )
 
 
@@ -34,7 +35,7 @@ class ReleaseAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'package__programming_language',
-        'status', 'created'
+        'status', 'package__rank', 'created',
     )
     autocomplete_fields = (
         'package',
