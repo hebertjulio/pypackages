@@ -50,21 +50,19 @@ class Command(BaseCommand):
             release = matches.group(2)
 
             # skip no stable releases
-            # regex = r'\D(?:rc\d+|[a-z]+\d*)$'
-            # match = re.match(regex, release)
-            # if match is not None:
-            #     continue
+            regex = r'(?:dev|rc|post)\d+'
+            match = re.match(regex, release)
 
-            # get package link
-            regex = r'^(.+)(?:%s/)$' % release
-            matches = re.search(regex, item['link'])
-            homepage = matches.group(1)
+            if match is None:
+                regex = r'^(.+)(?:%s/)$' % release
+                matches = re.search(regex, item['link'])
+                homepage = matches.group(1)
 
-            description = item['description'] or ''
-            description = text_resume(description, 255, ' ')
+                description = item['description'] or ''
+                description = text_resume(description, 255, ' ')
 
-            yield {
-                'name': name, 'release': release, 'keywords': '',
-                'homepage': homepage, 'description': description,
-                'programming_language': Package.PROGRAMMING_LANGUAGE.python,
-            }
+                yield {
+                    'name': name, 'release': release, 'keywords': '',
+                    'homepage': homepage, 'description': description,
+                    'programming_language': Package.PROGRAMMING_LANGUAGE.python,
+                }
