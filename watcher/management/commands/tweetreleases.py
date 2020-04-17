@@ -85,7 +85,7 @@ class Command(BaseCommand):
                 api.update_status(tweet_text)
                 break
 
-            if len(hashtags) > 5:
+            if len(hashtags) > 2:
                 hashtags = hashtags[:-1]
             else:
                 description = text_resume(
