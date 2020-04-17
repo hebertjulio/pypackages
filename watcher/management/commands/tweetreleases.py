@@ -9,7 +9,6 @@ from watcher.models import Package, Release
 from watcher.resume import text_resume
 
 
-MIN_RANK = 13  # lulalivre :p
 MAX_TWEET_SIZE = 280
 
 
@@ -34,22 +33,13 @@ class Command(BaseCommand):
     def processing():
         for account in Command.get_accounts():
             releases = Release.objects.filter(
-                status=Release.STATUS.new, package__rank__gte=MIN_RANK,
                 package__programming_language=account['programming_language'],
-                package__status=Package.STATUS.done
+                package__rank__gte=settings.MIN_RANK,
+                package__status=Package.STATUS.done,
+                status=Release.STATUS.new,
             ).order_by('created')[0:1]
             for release in releases:
                 Command.write_tweets(release, account['api'])
-
-        # @TODO: refactoring this, two query! :(
-        # put done all releases of packages with rank less than 10
-        Release.objects.filter(
-            package__rank__lt=MIN_RANK,
-            package__status=Package.STATUS.done).update(
-                status=Release.STATUS.done)
-        Release.objects.filter(
-            package__status=Package.STATUS.fail).update(
-                status=Release.STATUS.done)
 
     @staticmethod
     def get_accounts():
