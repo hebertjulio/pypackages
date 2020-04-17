@@ -41,7 +41,18 @@ def get_packages_info():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=24)
+@sched.scheduled_job('interval', hours=2)
+def clear_packages():
+    """Clear packages that failed or no min rank"""
+    start_time = time.time()
+    subprocess.run([
+        PYTHON_PATH, 'manage.py', 'clearpackages'],
+        shell=False)  # nosec
+    print('clearpackages finished in %s seconds' % (
+        time.time() - start_time))
+
+
+@sched.scheduled_job('interval', hours=2)
 def clear_recent_actions():
     """Clear recent actions history"""
     start_time = time.time()
@@ -52,7 +63,7 @@ def clear_recent_actions():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=24)
+@sched.scheduled_job('interval', hours=2)
 def clear_sessions():
     """Clear all invalid sessions"""
     start_time = time.time()
