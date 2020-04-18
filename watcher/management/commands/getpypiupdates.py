@@ -2,6 +2,7 @@ import sys
 import re
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 from requests import get as rget
 from xmltodict import parse as xmlparse
@@ -33,7 +34,8 @@ class Command(BaseCommand):
                     description=item['description'],
                     keywords=item['keywords'],
                     homepage=item['homepage'])
-            if package.status != Package.STATUS.fail:
+            if (package.status == Package.STATUS.new
+                    or package.rank >= settings.MIN_RANK):
                 Release.objects.get_or_create(
                     name=item['release'], package=package,
                 )

@@ -44,7 +44,7 @@ class Command(BaseCommand):
     @staticmethod
     def get_accounts():
         if 'TWITTER_ACCOUNTS' in settings:
-            for programming_language in ['python',]:
+            for programming_language in ['python']:
                 if programming_language in settings['TWITTER_ACCOUNTS']:
                     secrets = settings[
                         'TWITTER_ACCOUNTS'][programming_language]
