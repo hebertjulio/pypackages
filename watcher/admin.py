@@ -7,7 +7,7 @@ from .models import Package, Release
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
         'name', 'programming_language', 'rank',
-        'description', 'status', 'created', 'modified',
+        'description', 'status',
     )
     search_fields = (
         'name', 'description', 'keywords',
@@ -25,8 +25,8 @@ class PackageAdmin(admin.ModelAdmin):
 @admin.register(Release)
 class ReleaseAdmin(admin.ModelAdmin):
     list_display = (
-        'package', 'name', 'status',
-        'created', 'modified',
+        'package', 'name', 'stable', 'status',
+        'created',
     )
     search_fields = (
         'name', 'package__name',
