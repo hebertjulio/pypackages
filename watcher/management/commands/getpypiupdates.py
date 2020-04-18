@@ -50,7 +50,7 @@ class Command(BaseCommand):
             release = matches.group(2)
 
             # skip no stable releases
-            regex = r'(?:dev|rc|post)\d+'
+            regex = r'(?:dev|rc)\d+'
             match = re.match(regex, release)
 
             if match is None:
