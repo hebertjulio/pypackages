@@ -6,6 +6,7 @@ from django.conf import settings
 
 from requests import get as rget
 from xmltodict import parse as xmlparse
+from dateutil import parser
 
 from watcher.models import Package, Release
 from watcher.resume import text_resume
@@ -26,7 +27,8 @@ class Command(BaseCommand):
             package = Command.get_or_create_package(info)
             if (package.status == Package.STATUS.new
                     or package.rank >= settings.MIN_RANK):
-                Command.create_or_update_release(info['release'], package)
+                Command.create_or_update_release(
+                    info['release'], info['pubdate'], package)
 
     @staticmethod
     def get_or_create_package(info):
@@ -44,15 +46,19 @@ class Command(BaseCommand):
         return package
 
     @staticmethod
-    def create_or_update_release(release, package):
+    def create_or_update_release(release, pubdate, package):
         try:
             obj = Release.objects.get(package=package)
             if release > obj.name:
                 obj.status = Release.STATUS.new
                 obj.name = release
+                obj.created = pubdate
                 obj.save()
         except Release.DoesNotExist:
-            Release.objects.create(name=release, package=package)
+            Release.objects.create(
+                name=release, package=package,
+                created=pubdate, modified=pubdate
+            )
 
     @staticmethod
     def get_updates():
@@ -77,9 +83,12 @@ class Command(BaseCommand):
                 description = item['description'] or ''
                 description = text_resume(description, 255, ' ')
 
+                pubdate = parser.parse(item['pubDate'])
+
                 yield {
                     'package': package, 'release': release, 'keywords': '',
                     'homepage': homepage, 'description': description,
                     'programming_language':
                         Package.PROGRAMMING_LANGUAGE.python,
+                    'pubdate': pubdate
                 }
