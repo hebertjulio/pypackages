@@ -53,7 +53,7 @@ class Command(BaseCommand):
 
             # skip no stable releases
             regex = r'(?:dev|rc)\d+'
-            match = re.match(regex, release)
+            match = re.search(regex, release)
 
             if match is None:
                 regex = r'^(.+)(?:%s/)$' % release
