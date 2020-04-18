@@ -9,7 +9,7 @@ from watcher.models import Package
 
 
 class Command(BaseCommand):
-    help = 'Clear packages that failed or no min rank'
+    help = 'Clear old packages that failed or no min rank'
 
     def handle(self, *args, **options):
         try:
