@@ -1,10 +1,8 @@
 import sys
 import re
-import datetime
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from django.utils import timezone
 
 from requests import get as rget
 from xmltodict import parse as xmlparse
