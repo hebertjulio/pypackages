@@ -22,23 +22,37 @@ class Command(BaseCommand):
 
     @staticmethod
     def processing():
-        for item in Command.get_updates():
-            try:
-                package = Package.objects.get(
-                    programming_language=item['programming_language'],
-                    name__iexact=item['name'])
-            except Package.DoesNotExist:
-                package = Package.objects.create(
-                    name=item['name'],
-                    programming_language=item['programming_language'],
-                    description=item['description'],
-                    keywords=item['keywords'],
-                    homepage=item['homepage'])
+        for info in Command.get_updates():
+            package = Command.get_or_create_package(info)
             if (package.status == Package.STATUS.new
                     or package.rank >= settings.MIN_RANK):
-                Release.objects.get_or_create(
-                    name=item['release'], package=package,
-                )
+                Command.create_or_update_release(info['release'], package)
+
+    @staticmethod
+    def get_or_create_package(info):
+        try:
+            package = Package.objects.get(
+                programming_language=info['programming_language'],
+                name__iexact=info['package'])
+        except Package.DoesNotExist:
+            package = Package.objects.create(
+                name=info['package'],
+                programming_language=info['programming_language'],
+                description=info['description'],
+                keywords=info['keywords'],
+                homepage=info['homepage'])
+        return package
+
+    @staticmethod
+    def create_or_update_release(release, package):
+        try:
+            obj = Release.objects.get(package=package)
+            if release > obj.name:
+                obj.status = Release.STATUS.new
+                obj.name = release
+                obj.save()
+        except Release.DoesNotExist:
+            Release.objects.create(name=release, package=package)
 
     @staticmethod
     def get_updates():
@@ -48,7 +62,7 @@ class Command(BaseCommand):
             # get package name and release
             regex = r'^(.+)\s(.+)$'
             matches = re.search(regex, item['title'])
-            name = matches.group(1)
+            package = matches.group(1)
             release = matches.group(2)
 
             # skip no stable releases
@@ -64,7 +78,8 @@ class Command(BaseCommand):
                 description = text_resume(description, 255, ' ')
 
                 yield {
-                    'name': name, 'release': release, 'keywords': '',
+                    'package': package, 'release': release, 'keywords': '',
                     'homepage': homepage, 'description': description,
-                    'programming_language': Package.PROGRAMMING_LANGUAGE.python,
+                    'programming_language':
+                        Package.PROGRAMMING_LANGUAGE.python,
                 }

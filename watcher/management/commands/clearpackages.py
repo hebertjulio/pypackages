@@ -20,7 +20,7 @@ class Command(BaseCommand):
     @staticmethod
     def processing():
         now = timezone.now()
-        delta = now - datetime.timedelta(days=30)
+        delta = now - datetime.timedelta(days=90)
         # delete all fail packages
         Package.objects.filter(
             status=Package.STATUS.fail,
