@@ -1,4 +1,5 @@
 import sys
+import re
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -37,9 +38,17 @@ class Command(BaseCommand):
                 package__rank__gte=settings.MIN_RANK,
                 package__status=Package.STATUS.done,
                 status=Release.STATUS.new,
-            ).order_by('created')[0:1]
+            ).order_by('created')
             for release in releases:
+                if release.package.stable_regex:
+                    match = re.search(
+                        release.package.stable_regex, release.name)
+                    if match is None:
+                        release.status = Release.STATUS.done
+                        release.save()
+                        continue
                 Command.write_tweets(release, account['api'])
+                break
 
     @staticmethod
     def get_accounts():

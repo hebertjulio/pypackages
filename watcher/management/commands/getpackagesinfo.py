@@ -1,5 +1,6 @@
 import sys
 import time
+import re
 
 from django.core.management.base import BaseCommand
 
@@ -62,6 +63,14 @@ class Command(BaseCommand):
                     package.name,
                 ] + info['keywords']])
             ))
+
+            latest_stable_release = info['latest_stable_release']
+            if latest_stable_release:
+                stable_regex = r'^\d+(?:\.\d+)+$'
+                match = re.search(
+                    stable_regex, latest_stable_release)
+                if match:
+                    package.stable_regex = stable_regex
 
             package.keywords = text_resume(keywords, 255, ',')
 

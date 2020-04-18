@@ -64,7 +64,12 @@ class LibrariesIO:
         if 'rank' in info:
             rank = info['rank'] or 0
 
+        latest_stable_release = ''
+        if 'latest_stable_release_number' in info:
+            latest_stable_release = info['latest_stable_release_number'] or ''
+
         return {
             'description': description, 'repository': repository,
             'homepage': homepage, 'keywords': keywords, 'rank': rank,
+            'latest_stable_release': latest_stable_release
         }

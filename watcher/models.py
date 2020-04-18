@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -26,6 +28,8 @@ class Package(TimeStampedModel):
     keywords = models.CharField(_('keywords'), max_length=255)
     description = models.CharField(_('description'), max_length=255)
     homepage = models.CharField(_('homepage'), max_length=255)
+    stable_regex = models.CharField(
+        _('stable regex'), max_length=100, blank=True)
     status = models.CharField(
         _('status'), max_length=50, db_index=True,
         default=STATUS.new, choices=STATUS
@@ -66,10 +70,21 @@ class Release(TimeStampedModel):
     def __repr__(self):
         return self.name
 
+    def stable(self):
+        if self.package.status == Package.STATUS.done:
+            if self.package.stable_regex:
+                match = re.search(
+                    self.package.stable_regex, self.name)
+                return 'unstable' if match is None else 'stable'
+            return 'stable'
+        return 'unknown'
+
     class Meta:
         verbose_name = _('release')
         verbose_name_plural = _('releases')
         unique_together = [
             ['name', 'package'],
         ]
-        ordering = ['status', '-created']
+        ordering = [
+            '-status', '-created'
+        ]

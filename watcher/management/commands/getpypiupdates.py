@@ -25,10 +25,18 @@ class Command(BaseCommand):
     def processing():
         for info in Command.get_updates():
             package = Command.get_or_create_package(info)
-            if (package.status == Package.STATUS.new
-                    or package.rank >= settings.MIN_RANK):
-                Command.create_or_update_release(
-                    info['release'], info['pubdate'], package)
+            if package.status == Package.STATUS.fail:
+                continue
+            if (package.status == Package.STATUS.done
+                    and package.rank < settings.MIN_RANK):
+                continue
+            if package.stable_regex:
+                match = re.search(
+                    package.stable_regex, info['release'])
+                if match is None:
+                    continue
+            Command.create_or_update_release(
+                info['release'], info['pubdate'], package)
 
     @staticmethod
     def get_or_create_package(info):
