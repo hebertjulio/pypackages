@@ -1,8 +1,6 @@
 import sys
-import datetime
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from django.conf import settings
 
 from watcher.models import Package, Release
@@ -19,12 +17,6 @@ class Command(BaseCommand):
 
     @staticmethod
     def processing():
-        now = timezone.now()
-        delta = now - datetime.timedelta(days=5)
-        # delete old releases
-        Release.objects.filter(
-            created__lte=delta
-        ).delete()
         # delete releases of fail packages
         Release.objects.filter(
             package__status=Package.STATUS.fail
