@@ -25,7 +25,7 @@ class PackageAdmin(admin.ModelAdmin):
 @admin.register(Release)
 class ReleaseAdmin(admin.ModelAdmin):
     list_display = (
-        'package', 'name', 'stable', 'status',
+        'package', 'name', 'status',
         'created',
     )
     search_fields = (

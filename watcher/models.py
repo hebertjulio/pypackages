@@ -1,5 +1,3 @@
-import re
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -69,15 +67,6 @@ class Release(TimeStampedModel):
 
     def __repr__(self):
         return self.name
-
-    def stable(self):
-        if self.package.status == Package.STATUS.done:
-            if self.package.stable_regex:
-                match = re.search(
-                    self.package.stable_regex, self.name)
-                return 'unstable' if match is None else 'stable'
-            return 'stable'
-        return 'unknown'
 
     class Meta:
         verbose_name = _('release')
