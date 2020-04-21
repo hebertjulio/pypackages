@@ -33,6 +33,8 @@ class Package(TimeStampedModel):
         default=STATUS.new, choices=STATUS
     )
     message = models.TextField(_('message'), blank=True)
+    last_release = models.CharField(_('last release'), max_length=50)
+    has_new_release = models.BooleanField(_('has new release'))
 
     def __str__(self):
         return self.name
@@ -47,33 +49,3 @@ class Package(TimeStampedModel):
             ['name', 'programming_language'],
         ]
         ordering = ['name']
-
-
-class Release(TimeStampedModel):
-    STATUS = Choices(
-        ('new', _('new')),
-        ('done', _('done')),
-    )
-
-    name = models.CharField(_('name'), max_length=50)
-    package = models.ForeignKey('Package', on_delete=models.CASCADE)
-    status = models.CharField(
-        _('status'), max_length=50, db_index=True,
-        default=STATUS.new, choices=STATUS
-    )
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = _('release')
-        verbose_name_plural = _('releases')
-        unique_together = [
-            ['name', 'package'],
-        ]
-        ordering = [
-            '-status', '-created'
-        ]
