@@ -2,13 +2,12 @@ import sys
 import re
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
 
 from requests import get as rget
 from xmltodict import parse as xmlparse
 from dateutil import parser
 
-from watcher.models import Package, Release
+from watcher.models import Package
 from watcher.resume import text_resume
 
 
@@ -24,49 +23,27 @@ class Command(BaseCommand):
     @staticmethod
     def processing():
         for info in Command.get_updates():
-            package = Command.get_or_create_package(info)
-            if package.status == Package.STATUS.fail:
-                continue
-            if (package.status == Package.STATUS.done
-                    and package.rank < settings.MIN_RANK):
-                continue
-            if package.stable_regex:
-                match = re.search(
-                    package.stable_regex, info['release'])
-                if match is None:
-                    continue
-            Command.create_or_update_release(
-                info['release'], info['pubdate'], package)
+            Command.create_or_update_package(info)
 
     @staticmethod
-    def get_or_create_package(info):
+    def create_or_update_package(info):
         try:
             package = Package.objects.get(
                 programming_language=info['programming_language'],
                 name__iexact=info['package'])
+            package.status = Package.STATUS.new
+            package.last_release = info['release']
+            package.has_new_release = True
+            package.save()
         except Package.DoesNotExist:
-            package = Package.objects.create(
+            Package.objects.create(
                 name=info['package'],
                 programming_language=info['programming_language'],
                 description=info['description'],
                 keywords=info['keywords'],
-                homepage=info['homepage'])
-        return package
-
-    @staticmethod
-    def create_or_update_release(release, pubdate, package):
-        try:
-            obj = Release.objects.get(package=package)
-            if release > obj.name:
-                obj.status = Release.STATUS.new
-                obj.name = release
-                obj.created = pubdate
-                obj.save()
-        except Release.DoesNotExist:
-            Release.objects.create(
-                name=release, package=package,
-                created=pubdate, modified=pubdate
-            )
+                homepage=info['homepage'],
+                last_release=info['release'],
+                has_new_release=True)
 
     @staticmethod
     def get_updates():

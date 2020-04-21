@@ -42,17 +42,6 @@ def get_packages_info():
 
 
 @sched.scheduled_job('interval', minutes=60)
-def clear_releases():
-    """Clear releases"""
-    start_time = time.time()
-    subprocess.run([
-        PYTHON_PATH, 'manage.py', 'clearreleases'],
-        shell=False)  # nosec
-    print('clearreleases finished in %s seconds' % (
-        time.time() - start_time))
-
-
-@sched.scheduled_job('interval', minutes=60)
 def clear_packages():
     """Clear old packages that failed or no min rank"""
     start_time = time.time()
