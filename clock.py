@@ -52,7 +52,7 @@ def clear_releases():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=24)
+@sched.scheduled_job('interval', minutes=60)
 def clear_packages():
     """Clear old packages that failed or no min rank"""
     start_time = time.time()
@@ -63,7 +63,7 @@ def clear_packages():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=24)
+@sched.scheduled_job('interval', minutes=60)
 def clear_recent_actions():
     """Clear recent actions history"""
     start_time = time.time()
@@ -74,7 +74,7 @@ def clear_recent_actions():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=24)
+@sched.scheduled_job('interval', minutes=60)
 def clear_sessions():
     """Clear all invalid sessions"""
     start_time = time.time()
