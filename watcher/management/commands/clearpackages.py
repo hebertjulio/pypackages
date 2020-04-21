@@ -1,15 +1,13 @@
 import sys
-import datetime
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from django.utils import timezone
 
 from watcher.models import Package
 
 
 class Command(BaseCommand):
-    help = 'Clear old packages that failed or no min rank'
+    help = 'Delete 1000 pacakges when 8000 packages was inserted'
 
     def handle(self, *args, **options):
         try:
@@ -19,16 +17,11 @@ class Command(BaseCommand):
 
     @staticmethod
     def processing():
-        now = timezone.now()
-        delta = now - datetime.timedelta(days=90)
-        # delete all fail packages
-        Package.objects.filter(
-            status=Package.STATUS.fail,
-            created__lte=delta,
-        ).delete()
-        # delete all packages with rank less than MIN_RANK
-        Package.objects.filter(
-            status=Package.STATUS.done,
-            created__lte=delta,
-            rank__lt=settings.MIN_RANK,
-        ).delete()
+        count = Package.objects.all().count()
+        if count <= 8000:
+            return
+        packages = Package.objects.filter(
+            rank__lt=settings.MIN_RANK).values_list('pk').order_by(
+                'rank', '-created')[0:1000]
+        deleted, _ = Package.objects.filter(pk__in=packages).delete()
+        print('package(s) deleted: %d' % deleted)
