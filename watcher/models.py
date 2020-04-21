@@ -26,15 +26,14 @@ class Package(TimeStampedModel):
     keywords = models.CharField(_('keywords'), max_length=255)
     description = models.CharField(_('description'), max_length=255)
     homepage = models.CharField(_('homepage'), max_length=255)
-    stable_regex = models.CharField(
-        _('stable regex'), max_length=100, blank=True)
     status = models.CharField(
         _('status'), max_length=50, db_index=True,
         default=STATUS.new, choices=STATUS
     )
-    message = models.TextField(_('message'), blank=True)
+    message = models.TextField(_('message'), blank=True, default='')
     last_release = models.CharField(_('last release'), max_length=50)
-    has_new_release = models.BooleanField(_('has new release'))
+    has_new_release = models.BooleanField(
+        _('has new release'), default=False, db_index=True)
 
     def __str__(self):
         return self.name

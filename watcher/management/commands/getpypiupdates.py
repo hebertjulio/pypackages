@@ -14,6 +14,10 @@ from watcher.resume import text_resume
 class Command(BaseCommand):
     help = 'Read http://pypi.org/rss/updates.xml to catch new releases'
 
+    trans = str.maketrans({
+        '-': None, '_': None, ' ': None, '.': None
+    })
+
     def handle(self, *args, **options):
         try:
             Command.processing()
@@ -33,7 +37,6 @@ class Command(BaseCommand):
                 name__iexact=info['package'])
             package.status = Package.STATUS.new
             package.last_release = info['release']
-            package.has_new_release = True
             package.save()
         except Package.DoesNotExist:
             Package.objects.create(
@@ -42,8 +45,7 @@ class Command(BaseCommand):
                 description=info['description'],
                 keywords=info['keywords'],
                 homepage=info['homepage'],
-                last_release=info['release'],
-                has_new_release=True)
+                last_release=info['release'])
 
     @staticmethod
     def get_updates():
@@ -70,10 +72,18 @@ class Command(BaseCommand):
 
                 pubdate = parser.parse(item['pubDate'])
 
+                keywords = ','.join([
+                    Package.PROGRAMMING_LANGUAGE.python,
+                    package,
+                ])
+
+                keywords = keywords.translate(Command.trans)
+                keywords = keywords.lower()
+
                 yield {
-                    'package': package, 'release': release, 'keywords': '',
-                    'homepage': homepage, 'description': description,
+                    'package': package, 'release': release,
+                    'keywords': keywords, 'homepage': homepage,
+                    'description': description, 'pubdate': pubdate,
                     'programming_language':
                         Package.PROGRAMMING_LANGUAGE.python,
-                    'pubdate': pubdate
                 }
