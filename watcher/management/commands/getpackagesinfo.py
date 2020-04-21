@@ -3,6 +3,7 @@ import time
 import re
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 from requests.exceptions import HTTPError
 
@@ -35,6 +36,7 @@ class Command(BaseCommand):
             package.message = ''
             retry = 0
             platform = 'pypi'
+
             while True:
                 try:
                     error = None
@@ -56,21 +58,14 @@ class Command(BaseCommand):
                 package.save()
                 continue
 
+            has_new_release = True
+
             keywords = ','.join(list(dict.fromkeys([
                 keyword.translate(Command.trans).lower()
-                for keyword in [
-                    Package.PROGRAMMING_LANGUAGE.python,
-                    package.name,
-                ] + info['keywords']])
+                for keyword in package.keywords.split(
+                    ',') + info['keywords']
+                if keyword])
             ))
-
-            latest_stable_release = info['latest_stable_release']
-            if latest_stable_release:
-                stable_regex = r'^\d+(?:\.\d+)+$'
-                match = re.search(
-                    stable_regex, latest_stable_release)
-                if match:
-                    package.stable_regex = stable_regex
 
             package.keywords = text_resume(keywords, 255, ',')
 
@@ -81,6 +76,17 @@ class Command(BaseCommand):
             if info['homepage']:
                 package.homepage = info['homepage']
 
+            if info['rank'] < settings.MIN_RANK:
+                has_new_release = False
+
+            regex = r'^\d+(?:\.\d+)+$'
+            match = re.search(regex, info['latest_stable_release'])
+            if match is not None:
+                match = re.search(regex, package.last_release)
+                if match is None:
+                    has_new_release = False
+
+            package.has_new_release = has_new_release
             package.repository = info['repository']
             package.rank = info['rank']
             package.status = Package.STATUS.done
