@@ -43,7 +43,7 @@ def get_packages_info():
 
 @sched.scheduled_job('interval', minutes=60)
 def clear_packages():
-    """Clear old packages that failed or no min rank"""
+    """Delete 1000 pacakges when 8000 packages was inserted"""
     start_time = time.time()
     subprocess.run([
         PYTHON_PATH, 'manage.py', 'clearpackages'],
