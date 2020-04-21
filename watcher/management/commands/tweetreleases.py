@@ -34,12 +34,15 @@ class Command(BaseCommand):
         for account in Command.get_accounts():
             packages = Package.objects.filter(
                 programming_language=account['programming_language'],
-                rank__gte=settings.MIN_RANK,
                 status=Package.STATUS.done,
                 has_new_release=True,
-            ).order_by('created')[0:1]
+            ).order_by('created')
             for package in packages:
-                Command.write_tweets(package, account['api'])
+                package.has_new_release = False
+                package.save()
+                if package.rank >= settings.MIN_RANK:
+                    Command.write_tweets(package, account['api'])
+                    break
 
     @staticmethod
     def get_accounts():
@@ -92,6 +95,3 @@ class Command(BaseCommand):
                 description = text_resume(
                     description, MAX_TWEET_SIZE, ' ',
                     oneslice=False) + '...'
-
-        package.has_new_release = False
-        package.save()
