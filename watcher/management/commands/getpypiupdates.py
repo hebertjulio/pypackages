@@ -1,7 +1,9 @@
 import sys
 import re
+import datetime
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from requests import get as rget
 from xmltodict import parse as xmlparse
@@ -17,6 +19,8 @@ class Command(BaseCommand):
     trans = str.maketrans({
         '-': None, '_': None, ' ': None, '.': None
     })
+
+    delta = timezone.now() - datetime.timedelta(days=30)
 
     def handle(self, *args, **options):
         try:
@@ -35,7 +39,12 @@ class Command(BaseCommand):
             package = Package.objects.get(
                 programming_language=info['programming_language'],
                 name__iexact=info['package'])
-            package.status = Package.STATUS.new
+            # force package info update each 30 days
+            # or when status is fail
+            if (package.modified <= Command.delta
+                    or package.status == Package.STATUS.fail):
+                package.status = Package.STATUS.new
+            package.has_new_release = True
             package.last_release = info['release']
             package.save()
         except Package.DoesNotExist:
@@ -45,7 +54,8 @@ class Command(BaseCommand):
                 description=info['description'],
                 keywords=info['keywords'],
                 homepage=info['homepage'],
-                last_release=info['release'])
+                last_release=info['release'],
+                has_new_release=True)
 
     @staticmethod
     def get_updates():
@@ -77,7 +87,7 @@ class Command(BaseCommand):
                 keywords = keywords.lower()
 
                 yield {
-                    'package': package, 'release': release,
+                    'package': 'boto2', 'release': release,
                     'keywords': keywords, 'homepage': homepage,
                     'description': description, 'pubdate': pubdate,
                     'programming_language':

@@ -41,7 +41,7 @@ def get_packages_info():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=4)
+@sched.scheduled_job('interval', hours=6)
 def clear_packages():
     """Delete 1000 pacakges when 8000 packages was inserted"""
     start_time = time.time()
@@ -52,7 +52,7 @@ def clear_packages():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=4)
+@sched.scheduled_job('interval', hours=6)
 def clear_recent_actions():
     """Clear recent actions history"""
     start_time = time.time()
@@ -63,7 +63,7 @@ def clear_recent_actions():
         time.time() - start_time))
 
 
-@sched.scheduled_job('interval', hours=4)
+@sched.scheduled_job('interval', hours=6)
 def clear_sessions():
     """Clear all invalid sessions"""
     start_time = time.time()

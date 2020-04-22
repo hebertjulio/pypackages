@@ -3,7 +3,6 @@ import time
 import re
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
 
 from requests.exceptions import HTTPError
 
@@ -30,8 +29,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def processing():
-        packages = Package.objects.filter(
-            status=Package.STATUS.new).order_by('modified')
+        packages = Package.objects.filter(status=Package.STATUS.new)
         for package in packages:
             package.message = ''
             retry = 0
@@ -57,12 +55,11 @@ class Command(BaseCommand):
                 break
 
             if error is not None:
+                package.has_new_release = False
                 package.message = error
                 package.status = Package.STATUS.fail
                 package.save()
                 continue
-
-            has_new_release = True
 
             keywords = ','.join(list(dict.fromkeys([
                 keyword.translate(Command.trans).lower()
@@ -80,17 +77,11 @@ class Command(BaseCommand):
             if info['homepage']:
                 package.homepage = info['homepage']
 
-            if info['rank'] < settings.MIN_RANK:
-                has_new_release = False
-
-            regex = r'^\d+(?:\.\d+)+$'
+            regex = r'^v?\d+(?:\.\d+)+$'
             match = re.search(regex, info['latest_stable_release'])
             if match is not None:
-                match = re.search(regex, package.last_release)
-                if match is None:
-                    has_new_release = False
+                package.stable_release_regex = regex
 
-            package.has_new_release = has_new_release
             package.repository = info['repository']
             package.rank = info['rank']
             package.status = Package.STATUS.done

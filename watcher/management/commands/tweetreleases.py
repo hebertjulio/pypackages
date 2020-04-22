@@ -1,4 +1,5 @@
 import sys
+import re
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -36,13 +37,19 @@ class Command(BaseCommand):
                 programming_language=account['programming_language'],
                 status=Package.STATUS.done,
                 has_new_release=True,
-            ).order_by('created')
+            ).order_by('rank', '-modified')
             for package in packages:
                 package.has_new_release = False
                 package.save()
                 if package.rank >= settings.MIN_RANK:
-                    Command.write_tweets(package, account['api'])
-                    break
+                    continue
+                regex = package.stable_release_regex
+                if regex:
+                    match = re.search(regex, package.last_release)
+                    if match is None:
+                        continue
+                Command.write_tweets(package, account['api'])
+                break
 
     @staticmethod
     def get_accounts():
