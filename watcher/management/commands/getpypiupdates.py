@@ -1,5 +1,4 @@
 import sys
-import re
 
 from django.core.management.base import BaseCommand
 
@@ -58,11 +57,7 @@ class Command(BaseCommand):
             package = matches.group(1)
             release = matches.group(2)
 
-            # skip no stable releases
-            regex = r'(?:dev|rc)\d+'
-            match = re.search(regex, release)
-
-            if match is None:
+            if item['description']:
                 regex = r'^(.+)(?:%s/)$' % release
                 matches = re.search(regex, item['link'])
                 homepage = matches.group(1)
@@ -74,7 +69,7 @@ class Command(BaseCommand):
 
                 keywords = ','.join([
                     Package.PROGRAMMING_LANGUAGE.python,
-                    package,
+                    package, 'programming'
                 ])
 
                 keywords = keywords.translate(Command.trans)
