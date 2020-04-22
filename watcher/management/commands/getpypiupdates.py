@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 keywords = keywords.lower()
 
                 yield {
-                    'package': 'boto2', 'release': release,
+                    'package': package, 'release': release,
                     'keywords': keywords, 'homepage': homepage,
                     'description': description, 'pubdate': pubdate,
                     'programming_language':
