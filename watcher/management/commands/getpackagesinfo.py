@@ -49,6 +49,7 @@ class Command(BaseCommand):
                             continue
                         if e.response.status_code == 502:
                             time.sleep(10)
+                            continue
                     error = e
                 except LibrariesIOError as e:
                     error = e
