@@ -41,7 +41,7 @@ class Command(BaseCommand):
             for package in packages:
                 package.has_new_release = False
                 package.save()
-                if package.rank >= settings.MIN_RANK:
+                if package.rank < settings.MIN_RANK:
                     continue
                 regex = package.stable_release_regex
                 if regex:
