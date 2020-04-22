@@ -35,10 +35,10 @@ class Command(BaseCommand):
             retry = 0
             platform = 'pypi'
             info = None
+            error = None
 
             while True:
                 try:
-                    error = None
                     info = LibrariesIO.get_info(platform, package.name)
                 except HTTPError as e:
                     if retry < MAX_RETRY:
