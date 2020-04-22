@@ -36,6 +36,7 @@ class Command(BaseCommand):
             package.message = ''
             retry = 0
             platform = 'pypi'
+            info = None
 
             while True:
                 try:
@@ -48,8 +49,9 @@ class Command(BaseCommand):
                             time.sleep(65)
                             continue
                         if e.response.status_code == 502:
-                            time.sleep(10)
-                            continue
+                            if package.rank == 0:
+                                time.sleep(5)
+                                continue
                     error = e
                 except LibrariesIOError as e:
                     error = e
