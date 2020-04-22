@@ -39,6 +39,8 @@ class Command(BaseCommand):
             package = Package.objects.get(
                 programming_language=info['programming_language'],
                 name__iexact=info['package'])
+            if package.last_release == info['release']:
+                return
             # force package info update each 30 days
             # or when status is fail
             if (package.modified <= Command.delta
