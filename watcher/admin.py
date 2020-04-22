@@ -6,7 +6,7 @@ from .models import Package
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'rank', 'description',
+        'name', 'rank', 'description', 'stable_release_regex',
         'last_release', 'has_new_release', 'status',
     )
     search_fields = (

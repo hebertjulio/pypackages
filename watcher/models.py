@@ -34,6 +34,8 @@ class Package(TimeStampedModel):
     last_release = models.CharField(_('last release'), max_length=50)
     has_new_release = models.BooleanField(
         _('has new release'), default=False, db_index=True)
+    stable_release_regex = models.CharField(
+        _('stable release regex'), max_length=30, default='', blank=True)
 
     def __str__(self):
         return self.name
