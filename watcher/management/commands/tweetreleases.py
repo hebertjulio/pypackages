@@ -1,5 +1,5 @@
 import sys
-import re
+# import re
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -43,11 +43,11 @@ class Command(BaseCommand):
                 package.save()
                 if package.rank < settings.MIN_RANK:
                     continue
-                regex = package.stable_release_regex
-                if regex:
-                    match = re.search(regex, package.last_release)
-                    if match is None:
-                        continue
+#                regex = package.stable_release_regex
+#                if regex:
+#                    match = re.search(regex, package.last_release)
+#                    if match is None:
+#                        continue
                 Command.write_tweets(package, account['api'])
                 break
 
