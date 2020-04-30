@@ -40,15 +40,17 @@ class Command(BaseCommand):
             ).order_by('rank', '-modified')
             for package in packages:
                 package.has_new_release = False
-                package.save()
                 if package.rank < settings.MIN_RANK:
+                    package.save()
                     continue
                 regex = package.stable_release_regex
                 if regex:
                     match = re.search(regex, package.last_release)
                     if match is None:
+                        package.save()
                         continue
                 Command.write_tweets(package, account['api'])
+                package.save()
                 break
 
     @staticmethod
