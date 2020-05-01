@@ -52,7 +52,7 @@ class Command(BaseCommand):
                 try:
                     Command.write_tweets(package, account['api'])
                 except tweepy.error.TweepError as e:
-                    package.status = Package.STATUS.fail
+                    # package.status = Package.STATUS.fail
                     package.message = e.response.text
                 package.save()
                 break
