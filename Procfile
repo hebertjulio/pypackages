@@ -1,3 +1,3 @@
 release: python manage.py migrate
 clock: python clock.py
-web: gunicorn snitch.wsgi --log-file -
+web: gunicorn pypackages.wsgi --log-file -
