@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "snitch"
-version = "0.1.0"
+name = "pypackages"
+version = "1.0.0"
 description = "Tweet news releases of selected packages."
 authors = ["Hebert <hebertjulio@users.noreply.github.com>"]
 license = "MIT"
