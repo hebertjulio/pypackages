@@ -78,7 +78,10 @@ WSGI_APPLICATION = 'pypackages.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(env='HEROKU_POSTGRESQL_JADE_URL')
+    'default': dj_database_url.config(
+        env='HEROKU_POSTGRESQL_JADE_URL',
+        engine='django.db.backends.postgresql'
+    )
 }
 
 # Password validation
