@@ -1,3 +1,5 @@
+from types import GeneratorType
+
 from google.cloud import bigquery
 
 
@@ -18,7 +20,8 @@ class BigQuery:
         self.client = bigquery.Client()
 
     def get_downloads(self, projects):
-        if not isinstance(projects, list):
+        if not (isinstance(projects, list)
+                or isinstance(projects, GeneratorType)):
             raise ValueError
         projects = ','.join(['\'%s\'' % v for v in projects])
         query = self.__QUERY.format(projects=projects)
