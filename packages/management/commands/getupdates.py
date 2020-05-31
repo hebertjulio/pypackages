@@ -3,7 +3,7 @@ import re
 
 from django.core.management.base import BaseCommand
 
-from requests import get as rget
+from requests import get
 from xmltodict import parse as xmlparse
 from dateutil import parser
 
@@ -37,9 +37,9 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_updates():
-        resp = rget('https://pypi.org/rss/updates.xml')
-        json = xmlparse(resp.text)
-        for item in json['rss']['channel']['item']:
+        resp = get('https://pypi.org/rss/updates.xml')
+        dataset = xmlparse(resp.text)
+        for item in dataset['rss']['channel']['item']:
             regex = r'^(.+)\s(.+)$'
             matches = re.search(regex, item['title'])
             name = matches.group(1)
