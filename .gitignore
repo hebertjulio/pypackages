@@ -11,8 +11,9 @@ __mypy__/
 *.sqlite3
 *.db
 .secrets.*
-settings.toml
 
 
 !/media/.gitkeep
 !/static/.gitkeep
+
+/*.json

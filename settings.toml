@@ -1,0 +1,6 @@
+[development]
+
+DEBUG = true
+
+DATABASES__default__ENGINE = "django.db.backends.sqlite3"
+DATABASES__default__NAME = "db.sqlite3"
