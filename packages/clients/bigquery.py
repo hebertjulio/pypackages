@@ -13,7 +13,7 @@ class BigQuery:
             BETWEEN FORMAT_DATE(
                 '%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY))
             AND FORMAT_DATE('%Y%m%d', CURRENT_DATE())
-        GROUP BY file.project
+        GROUP BY file.project ORDER BY downloads DESC
     """
 
     def __init__(self):
