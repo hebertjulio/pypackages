@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'accounts',
     'watcher',
     'recentactions',
-    'packages',
+    # 'packages',
 ]
 
 MIDDLEWARE = [
