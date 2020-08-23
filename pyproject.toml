@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-django = "3.^0.0"
+django = "3.0.9"
 django-model-utils = "^4.0.0"
 tweepy = "^3.8.0"
 dynaconf = {extras = ["toml"], version = "^3.0.0"}
