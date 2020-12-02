@@ -21,7 +21,7 @@ class Command(BaseCommand):
     @classmethod
     def processing(cls, api):
         projects = {}
-        pattern = re.compile(r'^The release of (\w+) ')
+        pattern = re.compile(r'^The release of ([\w\-\.\_]+) ')
         statuses = tweepy.Cursor(api.user_timeline).items()
         for status in statuses:
             match = pattern.findall(status.text)
