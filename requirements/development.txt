@@ -1,0 +1,7 @@
+-r base.txt
+
+ipython==7.19.0
+ipdb==0.13.4
+flake8==3.8.4
+mypy==0.790
+pip-tools==5.4.0
